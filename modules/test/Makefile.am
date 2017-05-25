@@ -45,6 +45,7 @@ miniadsm_SOURCES = $(top_srcdir)/main_loop/cli.c $(top_srcdir)/main_loop/main_lo
   $(top_srcdir)/replace/replace.c $(top_srcdir)/replace/replace.h \
   $(top_srcdir)/general/general.c $(top_srcdir)/general/general.h \
   $(top_srcdir)/unit/unit.c $(top_srcdir)/unit/unit.h \
+  $(top_srcdir)/unit/scorecard.c $(top_srcdir)/unit/scorecard.h \
   $(top_srcdir)/event/event.c $(top_srcdir)/event/event.h \
   $(top_srcdir)/prob_dist/prob_dist.c $(top_srcdir)/prob_dist/prob_dist.h \
   $(top_srcdir)/rel_chart/rel_chart.c $(top_srcdir)/rel_chart/rel_chart.h \
@@ -162,6 +163,9 @@ EXTRA_DIST = config/unix.exp 1unit.xml 2units.xml \
   8units_2rows.xml 8units_2rows_2.xml 8units_2rows_3.xml 8units_2rows_4.xml \
   9units.xml \
   9units_hexagon.xml \
+  12units_2rings_largesmall_plus2infected.xml \
+  14units_2rings_overlap.xml \
+  15units_line.xml 15units_2rings.xml \
   units_circle.xml units_circle2.xml 16units_square.xml 16units_2rings.xml \
   1unit_1dayleft.xml 1unit_3daysleft.xml \
   1unit_start_infectious.xml 1unit_start_infectious_1dayleft.xml \
@@ -181,4 +185,7 @@ EXTRA_DIST = config/unix.exp 1unit.xml 2units.xml \
   2units_xy.xml 4units_line_xy.xml no_rtree_lat45_xy.xml rtree_lat45_xy.xml \
   3units_1_start_vimmune.xml \
   3units_1_start_destroyed.xml \
+  21units_3rings_overlap.xml \
+  24units_ring_plus2infected.xml \
+  24units_2rings_plus2infected.xml \
   $(testsuite_c_SOURCES)

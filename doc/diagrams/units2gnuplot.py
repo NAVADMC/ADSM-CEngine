@@ -12,7 +12,7 @@ __date__ = "December 2003"
 import re
 import sys
 from math import pi, ceil, floor
-import xml.etree.ElementTree as ET
+from xml.dom.minidom import parse
 import codecs
 
 EARTH_RADIUS = 6378.137
@@ -52,7 +52,7 @@ def getText (node):
 def main ():
 	units = []
 
-	doc = ET.parse(sys.stdin.detach()).getroot()  # detach means sys.stdin is treated as binary, not any specific encoding
+	doc = parse (sys.stdin)
 	statepats = [
 	  re.compile (r"0|S|Susceptible", re.I),
 	  re.compile (r"1|L|Latent", re.I),
@@ -65,24 +65,24 @@ def main ():
 
 	# Read the units.
 	count = 0
-	for unit in doc.findall('.//herd'):
-		idtag = unit.find('./id')
-		if idtag is not None:
-			unit_id = idtag.text
+	for unit in doc.getElementsByTagName ("herd"):
+		idtags = unit.getElementsByTagName ("id")
+		if len (idtags) > 0:
+			unit_id = getText (idtags[0])
 		else:
 			unit_id = str (count)
-		size = int(unit.find('./size').text)
+		size = int (getText (unit.getElementsByTagName ("size")[0]))
 		# Read either lat-lon or x-y (assumed to be in km).
-		lat_element = unit.find('.//latitude')
-		if lat_element is not None:
-			lat = float(lat_element.text)
-			lon = float(unit.find('.//longitude').text)
+		lat_elements = unit.getElementsByTagName ("latitude")
+		if lat_elements:
+			lat = float (getText (lat_elements[0]))
+			lon = float (getText (unit.getElementsByTagName ("longitude")[0]))
 			x = lon * DEG2KM
 			y = lat * DEG2KM
 		else:
-			x = float(unit.find('.//x').text)
-			y = float(unit.find('.//y').text)
-		state = unit.find('./status').text
+			x = float (getText (unit.getElementsByTagName ("x")[0]))
+			y = float (getText (unit.getElementsByTagName ("y")[0]))
+		state = getText (unit.getElementsByTagName ("status")[0])
 		for i in range (len(statepats)):
 			match = statepats[i].match (state)
 			if match:

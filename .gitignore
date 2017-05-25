@@ -29,7 +29,7 @@ doc/html/*
 # ADSM Project Specific Ignores
 ADSM/production_settings.py
 logs/
-CEngine/autom4te.cache/
+autom4te.cache/
 /static/
 media/
 development_scripts/Pandas
