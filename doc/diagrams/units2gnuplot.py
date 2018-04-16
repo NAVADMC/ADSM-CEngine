@@ -52,7 +52,7 @@ def getText (node):
 def main ():
 	units = []
 
-	doc = parse (sys.stdin)
+	doc = parse (sys.stdin.buffer)
 	statepats = [
 	  re.compile (r"0|S|Susceptible", re.I),
 	  re.compile (r"1|L|Latent", re.I),
