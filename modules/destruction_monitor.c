@@ -454,18 +454,38 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
    * destruction, to keep the output neater. */
   g_ptr_array_remove_fast (self->outputs, local_data->first_destruction_by_reason[ADSM_ControlReasonUnspecified] );
   g_ptr_array_remove_fast (self->outputs, local_data->first_destruction_by_reason[ADSM_ControlInitialState] );
+  g_ptr_array_remove_fast (self->outputs, local_data->first_destruction_by_reason[ADSM_ControlSuppressiveRing] );
+  g_ptr_array_remove_fast (self->outputs, local_data->first_destruction_by_reason[ADSM_ControlProtectiveRing] );
   g_ptr_array_remove_fast (self->outputs, local_data->num_units_destroyed_by_reason[ADSM_ControlReasonUnspecified] );
+  g_ptr_array_remove_fast (self->outputs, local_data->num_units_destroyed_by_reason[ADSM_ControlSuppressiveRing] );
+  g_ptr_array_remove_fast (self->outputs, local_data->num_units_destroyed_by_reason[ADSM_ControlProtectiveRing] );
   g_ptr_array_remove_fast (self->outputs, local_data->cumul_num_units_destroyed_by_reason[ADSM_ControlReasonUnspecified] );
+  g_ptr_array_remove_fast (self->outputs, local_data->cumul_num_units_destroyed_by_reason[ADSM_ControlSuppressiveRing] );
+  g_ptr_array_remove_fast (self->outputs, local_data->cumul_num_units_destroyed_by_reason[ADSM_ControlProtectiveRing] );
   g_ptr_array_remove_fast (self->outputs, local_data->num_animals_destroyed_by_reason[ADSM_ControlReasonUnspecified] );
+  g_ptr_array_remove_fast (self->outputs, local_data->num_animals_destroyed_by_reason[ADSM_ControlSuppressiveRing] );
+  g_ptr_array_remove_fast (self->outputs, local_data->num_animals_destroyed_by_reason[ADSM_ControlProtectiveRing] );
   g_ptr_array_remove_fast (self->outputs, local_data->cumul_num_animals_destroyed_by_reason[ADSM_ControlReasonUnspecified] );
+  g_ptr_array_remove_fast (self->outputs, local_data->cumul_num_animals_destroyed_by_reason[ADSM_ControlSuppressiveRing] );
+  g_ptr_array_remove_fast (self->outputs, local_data->cumul_num_animals_destroyed_by_reason[ADSM_ControlProtectiveRing] );
   for (prodtype = 0; prodtype < nprodtypes; prodtype++)
     {
       g_ptr_array_remove_fast (self->outputs, local_data->first_destruction_by_reason_and_prodtype[ADSM_ControlReasonUnspecified][prodtype] );
       g_ptr_array_remove_fast (self->outputs, local_data->first_destruction_by_reason_and_prodtype[ADSM_ControlInitialState][prodtype] );
+      g_ptr_array_remove_fast (self->outputs, local_data->first_destruction_by_reason_and_prodtype[ADSM_ControlSuppressiveRing][prodtype] );
+      g_ptr_array_remove_fast (self->outputs, local_data->first_destruction_by_reason_and_prodtype[ADSM_ControlProtectiveRing][prodtype] );
       g_ptr_array_remove_fast (self->outputs, local_data->num_units_destroyed_by_reason_and_prodtype[ADSM_ControlReasonUnspecified][prodtype] );
+      g_ptr_array_remove_fast (self->outputs, local_data->num_units_destroyed_by_reason_and_prodtype[ADSM_ControlSuppressiveRing][prodtype] );
+      g_ptr_array_remove_fast (self->outputs, local_data->num_units_destroyed_by_reason_and_prodtype[ADSM_ControlProtectiveRing][prodtype] );
       g_ptr_array_remove_fast (self->outputs, local_data->cumul_num_units_destroyed_by_reason_and_prodtype[ADSM_ControlReasonUnspecified][prodtype] );
+      g_ptr_array_remove_fast (self->outputs, local_data->cumul_num_units_destroyed_by_reason_and_prodtype[ADSM_ControlSuppressiveRing][prodtype] );
+      g_ptr_array_remove_fast (self->outputs, local_data->cumul_num_units_destroyed_by_reason_and_prodtype[ADSM_ControlProtectiveRing][prodtype] );
       g_ptr_array_remove_fast (self->outputs, local_data->num_animals_destroyed_by_reason_and_prodtype[ADSM_ControlReasonUnspecified][prodtype] );
+      g_ptr_array_remove_fast (self->outputs, local_data->num_animals_destroyed_by_reason_and_prodtype[ADSM_ControlSuppressiveRing][prodtype] );
+      g_ptr_array_remove_fast (self->outputs, local_data->num_animals_destroyed_by_reason_and_prodtype[ADSM_ControlProtectiveRing][prodtype] );
       g_ptr_array_remove_fast (self->outputs, local_data->cumul_num_animals_destroyed_by_reason_and_prodtype[ADSM_ControlReasonUnspecified][prodtype] );
+      g_ptr_array_remove_fast (self->outputs, local_data->cumul_num_animals_destroyed_by_reason_and_prodtype[ADSM_ControlSuppressiveRing][prodtype] );
+      g_ptr_array_remove_fast (self->outputs, local_data->cumul_num_animals_destroyed_by_reason_and_prodtype[ADSM_ControlProtectiveRing][prodtype] );
     }
 
 #if DEBUG

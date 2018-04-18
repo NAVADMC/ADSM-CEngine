@@ -422,7 +422,8 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
    * reasons that don't apply to exams, to keep the output neater. */
   for (reason = 0; reason < ADSM_NCONTROL_REASONS; reason++)
     {
-      if (reason == ADSM_ControlReasonUnspecified || reason == ADSM_ControlInitialState)
+      if (reason == ADSM_ControlReasonUnspecified || reason == ADSM_ControlInitialState
+          || reason == ADSM_ControlSuppressiveRing || reason == ADSM_ControlProtectiveRing)
         {
           g_ptr_array_remove_fast (self->outputs, local_data->nunits_examined_by_reason[reason] );
           g_ptr_array_remove_fast (self->outputs, local_data->cumul_nunits_examined_by_reason[reason] );
