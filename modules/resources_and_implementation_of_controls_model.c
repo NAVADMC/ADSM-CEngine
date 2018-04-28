@@ -1656,10 +1656,17 @@ vaccinate_by_priority (struct adsm_module_t_ *self, int day,
                     g_debug ("vaccination ring around unit \"%s\" has expired, removing",
                              ring->unit_at_center->official_id);
                   #endif
-                  g_ptr_array_remove_index (local_data->active_vaccination_rings, i);
-                  /* This g_ptr_array has a destroy function defined, so the
+                  /* Clean up the round-robin bucket for this ring. The hash
+                   * table round_robin_buckets has a value_destroy_func
+                   * defined, so the GQueue object will be properly freed when
+                   * we delete the key. */
+                  g_hash_table_remove (local_data->round_robin_buckets,
+                                       ring->unit_at_center);
+                  /* Now remove the entry from active_vaccination_rings. This
+                   * g_ptr_array has a destroy function defined, so the
                    * USC_vaccination_ring_t object will be properly freed by
-                   * the remove_index function. */
+                   * the remove_index function. */                  
+                  g_ptr_array_remove_index (local_data->active_vaccination_rings, i);
                 }
               else
                 {
