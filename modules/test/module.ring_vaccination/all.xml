@@ -8475,7 +8475,7 @@
 
     Vaccination is initiated after detection of 1 diseased unit.  A
     vaccination ring with inner radius 7/8 km and outer radius 1 1/8 km is
-    created around a detected unit.  There is capacity to vaccinate 100 units
+    created around a detected unit.  There is capacity to vaccinate 1 unit
     per day. Vaccination is prioritized by time waiting (oldest requests first),
     then by size (largest first).
 
@@ -8547,8 +8547,9 @@
   <parameter-file>prot_ring_punch_holes_3_expiry</parameter-file>
 
   <parameter-description>
-    Units of type “B” are latent for 1 day, clinical for 1 day, then immune.
     Units of type “A” are latent for 3 days, clinical for 1 day, then immune.
+    Units of type “B” are latent for 1 day, clinical for 1 day, then immune.
+    Units of type “C” are latent for 4 days, clinical for 1 day, then immune.
 
     There is no disease spread.
 
@@ -8556,7 +8557,7 @@
 
     Vaccination is initiated after detection of 1 diseased unit.  A
     vaccination ring with inner radius 7/8 km and outer radius 1 1/8 km is
-    created around a detected unit.  There is capacity to vaccinate 100 units
+    created around a detected unit.  There is capacity to vaccinate 2 units
     per day. Vaccination is prioritized by time waiting (oldest requests first),
     then by size (largest first).
 
