@@ -1432,6 +1432,7 @@ set_params (void *data, GHashTable *dict)
   long int tmp;
   gboolean use_fixed_contact_rate;
   guint pdf_id, rel_id;
+  gpointer tmp_ptr;
 
 #if DEBUG
   g_debug ("----- ENTER set_params (%s)", MODEL_NAME);
@@ -1523,9 +1524,17 @@ set_params (void *data, GHashTable *dict)
     p->shipping_delay = PDF_new_point_dist (0);
 
   errno = 0;
-  p->prob_infect = strtod (g_hash_table_lookup (dict, "infection_probability"), NULL);
-  g_assert (errno != ERANGE);
-  g_assert (p->prob_infect >= 0 && p->prob_infect <= 1);
+  tmp_ptr = g_hash_table_lookup (dict, "infection_probability");
+  if (tmp_ptr != NULL)
+    {
+      p->prob_infect = strtod (tmp_ptr, NULL);
+      g_assert (errno != ERANGE);
+      g_assert (p->prob_infect >= 0 && p->prob_infect <= 1);
+    }
+  else
+    {
+      p->prob_infect = 0;
+    }
 
   errno = 0;
   rel_id = strtol (g_hash_table_lookup (dict, "movement_control_id"), NULL, /* base */ 10);
