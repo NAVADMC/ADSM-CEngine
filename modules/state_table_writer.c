@@ -113,12 +113,10 @@ handle_output_dir_event (struct adsm_module_t_ * self,
  */
 void
 handle_before_each_simulation_event (struct adsm_module_t_ * self,
-                                     UNT_unit_list_t * units,
                                      EVT_before_each_simulation_event_t * event)
 {
   local_data_t *local_data;
   char *tmp_filename;
-  unsigned int nunits, i;
   GError *error = NULL;
 
 #if DEBUG
@@ -148,14 +146,9 @@ handle_before_each_simulation_event (struct adsm_module_t_ * self,
 
   g_free (tmp_filename);
 
-  g_string_printf (local_data->buf, "Run,Day");
-  nunits = UNT_unit_list_length (units);
-  for (i = 0; i < nunits; i++) /* columns = units */
-    g_string_append_printf (local_data->buf, ",%u", i);
-  g_string_append_c (local_data->buf, '\n');
-  g_io_channel_write_chars (local_data->channel, local_data->buf->str, 
-                            -1 /* assume null-terminated string */,
-                            NULL, &error);
+  g_io_channel_write_chars (local_data->channel,
+                            "iteration,day,herdID_general,status,Lat,Lon\n",
+                            -1 /* assume null-terminated string */, NULL, &error);
   g_io_channel_flush (local_data->channel, &error);
 
 #if DEBUG
@@ -189,18 +182,20 @@ handle_new_day_event (struct adsm_module_t_ * self,
   local_data = (local_data_t *) (self->model_data);
   nunits = UNT_unit_list_length (units);
 
-  /* The first two fields are run and day. */
-  g_string_printf (local_data->buf, "%i,%i", local_data->run_number, event->day);
   for (i = 0; i < nunits; i++)
     {
+      /* The first two fields are run and day. */
       unit = UNT_unit_list_get (units, i);
-      g_string_append_printf (local_data->buf, ",%c", UNT_state_letter[unit->state]);
+      g_string_printf (local_data->buf, "%i,%i,%s,%c,%.3f,%.4f\n",
+                       local_data->run_number,
+                       event->day,
+                       unit->official_id,
+                       UNT_state_letter[unit->state],
+                       unit->latitude, unit->longitude);
+      g_io_channel_write_chars (local_data->channel, local_data->buf->str, 
+                                -1 /* assume null-terminated string */,
+                                NULL, &error);
     } /* end of loop over units */
-
-  g_string_append_c (local_data->buf, '\n');
-  g_io_channel_write_chars (local_data->channel, local_data->buf->str, 
-                            -1 /* assume null-terminated string */,
-                            NULL, &error);
 
 #if DEBUG
   g_debug ("----- EXIT handle_new_day_event (%s)", MODEL_NAME);
@@ -234,7 +229,7 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units,
       handle_output_dir_event (self, &(event->u.output_dir));
       break;
     case EVT_BeforeEachSimulation:
-      handle_before_each_simulation_event (self, units, &(event->u.before_each_simulation));
+      handle_before_each_simulation_event (self, &(event->u.before_each_simulation));
       break;
     case EVT_NewDay:
       handle_new_day_event (self, units, &(event->u.new_day));
