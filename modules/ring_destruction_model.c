@@ -354,6 +354,15 @@ local_free (struct adsm_module_t_ *self)
 
 
 
+typedef struct
+{
+  adsm_module_t *self;
+  GError **error;
+}
+set_params_args_t;
+
+
+
 /**
  * Adds a set of parameters to a ring destruction model.
  *
@@ -365,7 +374,9 @@ local_free (struct adsm_module_t_ *self)
 static int
 set_params (void *data, GHashTable *dict)
 {
+  set_params_args_t *args;
   adsm_module_t *self;
+  GError **error;
   local_data_t *local_data;
   char *production_type_name;
   guint production_type_id;
@@ -378,8 +389,18 @@ set_params (void *data, GHashTable *dict)
 
   g_assert (g_hash_table_size (dict) == 4);
 
-  self = (adsm_module_t *)data;
+  args = data;
+  self = args->self;  
   local_data = (local_data_t *) (self->model_data);
+  error = args->error;
+
+  /* This function gets called once per row returned by the SQL query. If an
+   * error was caught in a previous row, don't bother processing subsequent
+   * rows. */
+  if (*error != NULL)
+    {
+      return 0;
+    }
 
   /* Find out which production type these parameters apply to. */
   production_type_name = g_hash_table_lookup (dict, "prodtype");
@@ -427,8 +448,16 @@ set_params (void *data, GHashTable *dict)
       key = g_strdup_printf ("%s,%s", production_type_name,
                              ADSM_control_reason_name[ADSM_ControlRing]);
       ptr = g_hash_table_lookup (local_data->priority_order_table, key);
-      g_assert (ptr != NULL);
-      p->priority = GPOINTER_TO_UINT(ptr);
+      if (ptr == NULL)
+        {
+          g_set_error (error, ADSM_MODULE_ERROR, 0,
+          "\"%s\" must appear in the destruction reason order",
+          ADSM_control_reason_name[ADSM_ControlRing]);
+        }
+      else
+        {
+          p->priority = GPOINTER_TO_UINT(ptr);
+        }
       g_free (key);
     }
 
@@ -451,6 +480,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
     0
   };
   guint nprod_types;
+  set_params_args_t set_params_args;
   char *sqlerr;
 
 #if DEBUG
@@ -481,13 +511,15 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   /* Get a table that shows the priority order for combinations of production
    * type and reason for destruction. */
   local_data->priority_order_table = adsm_read_priority_order (params);
+  set_params_args.self = self;
+  set_params_args.error = error;
   sqlite3_exec_dict (params,
                      "SELECT prodtype.name AS prodtype,destruction_is_a_ring_trigger,destruction_ring_radius,destruction_is_a_ring_target "
                      "FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol protocol,ScenarioCreator_protocolassignment xref "
                      "WHERE prodtype.id=xref.production_type_id "
                      "AND xref.control_protocol_id=protocol.id "
                      "AND (destruction_is_a_ring_trigger=1 OR destruction_is_a_ring_target=1)",
-                     set_params, self, &sqlerr);
+                     set_params, &set_params_args, &sqlerr);
   if (sqlerr)
     {
       g_error ("%s", sqlerr);

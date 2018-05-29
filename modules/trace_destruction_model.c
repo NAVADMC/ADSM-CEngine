@@ -267,7 +267,8 @@ static int
 get_priority (GHashTable *priority_order_table,
               char *production_type_name,
               ADSM_control_reason reason,
-              char *boolean_as_text)
+              char *boolean_as_text,
+              GError **error)
 {
   int priority = 0;
   long int tmp;
@@ -284,8 +285,16 @@ get_priority (GHashTable *priority_order_table,
       key = g_strdup_printf ("%s,%s", production_type_name,
                              ADSM_control_reason_name[reason]);
       ptr = g_hash_table_lookup (priority_order_table, key);
-      g_assert (ptr != NULL);
-      priority = GPOINTER_TO_UINT(ptr);
+      if (ptr == NULL)
+        {
+          g_set_error (error, ADSM_MODULE_ERROR, 0,
+          "\"%s\" must appear in the destruction reason order",
+          ADSM_control_reason_name[reason]);
+        }
+      else
+        {
+          priority = GPOINTER_TO_UINT(ptr);
+        }
       g_free (key);
     }
 
@@ -293,6 +302,15 @@ get_priority (GHashTable *priority_order_table,
 }
               
               
+typedef struct
+{
+  adsm_module_t *self;
+  GError **error;
+}
+set_params_args_t;
+
+
+
 /**
  * Adds a set of parameters to a trace destruction model.
  *
@@ -304,7 +322,9 @@ get_priority (GHashTable *priority_order_table,
 static int
 set_params (void *data, GHashTable *dict)
 {
+  set_params_args_t *args;
   adsm_module_t *self;
+  GError **error;
   local_data_t *local_data;
   char *production_type_name;
   guint production_type_id;
@@ -315,32 +335,52 @@ set_params (void *data, GHashTable *dict)
 
   g_assert (g_hash_table_size (dict) == 5);
 
-  self = (adsm_module_t *)data;
+  args = data;
+  self = args->self;  
   local_data = (local_data_t *) (self->model_data);
+  error = args->error;
 
   /* Find out which production type these parameters apply to. */
   production_type_name = g_hash_table_lookup (dict, "prodtype");
   production_type_id = adsm_read_prodtype (production_type_name, local_data->production_types);
 
-  local_data->priority[ADSM_DirectContact][ADSM_TraceBackOrIn][production_type_id]
-    = get_priority (local_data->priority_order_table, production_type_name,
-                    ADSM_ControlTraceBackDirect,
-                    g_hash_table_lookup (dict, "destroy_direct_back_traces"));
+  /* This function gets called once per row returned by the SQL query. After an
+   * error is caught, don't bother processing subsequent parameters. */
+  if (*error == NULL)
+    {
+      local_data->priority[ADSM_DirectContact][ADSM_TraceBackOrIn][production_type_id]
+        = get_priority (local_data->priority_order_table, production_type_name,
+                        ADSM_ControlTraceBackDirect,
+                        g_hash_table_lookup (dict, "destroy_direct_back_traces"),
+                        error);
+    }
 
-  local_data->priority[ADSM_DirectContact][ADSM_TraceForwardOrOut][production_type_id]
-    = get_priority (local_data->priority_order_table, production_type_name,
-                    ADSM_ControlTraceForwardDirect,
-                    g_hash_table_lookup (dict, "destroy_direct_forward_traces"));
+  if (*error == NULL)
+    {
+      local_data->priority[ADSM_DirectContact][ADSM_TraceForwardOrOut][production_type_id]
+        = get_priority (local_data->priority_order_table, production_type_name,
+                        ADSM_ControlTraceForwardDirect,
+                        g_hash_table_lookup (dict, "destroy_direct_forward_traces"),
+                        error);
+    }
 
-  local_data->priority[ADSM_IndirectContact][ADSM_TraceBackOrIn][production_type_id]
-    = get_priority (local_data->priority_order_table, production_type_name,
-                    ADSM_ControlTraceBackIndirect,
-                    g_hash_table_lookup (dict, "destroy_indirect_back_traces"));
+  if (*error == NULL)
+    {
+      local_data->priority[ADSM_IndirectContact][ADSM_TraceBackOrIn][production_type_id]
+        = get_priority (local_data->priority_order_table, production_type_name,
+                        ADSM_ControlTraceBackIndirect,
+                        g_hash_table_lookup (dict, "destroy_indirect_back_traces"),
+                        error);
+    }
 
-  local_data->priority[ADSM_IndirectContact][ADSM_TraceForwardOrOut][production_type_id]
-    = get_priority (local_data->priority_order_table, production_type_name,
-                    ADSM_ControlTraceForwardIndirect,
-                    g_hash_table_lookup (dict, "destroy_indirect_forward_traces"));
+  if (*error == NULL)
+    {
+      local_data->priority[ADSM_IndirectContact][ADSM_TraceForwardOrOut][production_type_id]
+        = get_priority (local_data->priority_order_table, production_type_name,
+                        ADSM_ControlTraceForwardIndirect,
+                        g_hash_table_lookup (dict, "destroy_indirect_forward_traces"),
+                        error);
+    }
 
   return 0;
 }
@@ -361,6 +401,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
     0
   };
   guint nprod_types, i, j;
+  set_params_args_t set_params_args;
   char *sqlerr;
 
 #if DEBUG
@@ -397,13 +438,15 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   /* Get a table that shows the priority order for combinations of production
    * type and reason for destruction. */
   local_data->priority_order_table = adsm_read_priority_order (params);
+  set_params_args.self = self;
+  set_params_args.error = error;
   sqlite3_exec_dict (params,
                      "SELECT prodtype.name AS prodtype,destroy_direct_back_traces,destroy_direct_forward_traces,destroy_indirect_back_traces,destroy_indirect_forward_traces "
                      "FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol protocol,ScenarioCreator_protocolassignment xref "
                      "WHERE prodtype.id=xref.production_type_id "
                      "AND xref.control_protocol_id=protocol.id "
                      "AND (destroy_direct_back_traces=1 OR destroy_direct_forward_traces=1 OR destroy_indirect_back_traces=1 OR destroy_indirect_forward_traces=1)",
-                     set_params, self, &sqlerr);
+                     set_params, &set_params_args, &sqlerr);
   if (sqlerr)
     {
       g_error ("%s", sqlerr);
