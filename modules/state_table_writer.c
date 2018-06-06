@@ -147,7 +147,7 @@ handle_before_each_simulation_event (struct adsm_module_t_ * self,
   g_free (tmp_filename);
 
   g_io_channel_write_chars (local_data->channel,
-                            "iteration,day,herdID_general,status,Lat,Lon\n",
+                            "run,day,herdID_general,status,Lat,Lon\n",
                             -1 /* assume null-terminated string */, NULL, &error);
   g_io_channel_flush (local_data->channel, &error);
 
@@ -186,15 +186,18 @@ handle_new_day_event (struct adsm_module_t_ * self,
     {
       /* The first two fields are run and day. */
       unit = UNT_unit_list_get (units, i);
-      g_string_printf (local_data->buf, "%i,%i,%s,%c,%.3f,%.4f\n",
-                       local_data->run_number,
-                       event->day,
-                       unit->official_id,
-                       UNT_state_letter[unit->state],
-                       unit->latitude, unit->longitude);
-      g_io_channel_write_chars (local_data->channel, local_data->buf->str, 
-                                -1 /* assume null-terminated string */,
-                                NULL, &error);
+      if (unit->state != Susceptible)
+        {
+          g_string_printf (local_data->buf, "%i,%i,%s,%c,%.3f,%.4f\n",
+                           local_data->run_number,
+                           event->day,
+                           unit->official_id,
+                           UNT_state_letter[unit->state],
+                           unit->latitude, unit->longitude);
+          g_io_channel_write_chars (local_data->channel, local_data->buf->str, 
+                                    -1 /* assume null-terminated string */,
+                                    NULL, &error);
+        }
     } /* end of loop over units */
 
 #if DEBUG
