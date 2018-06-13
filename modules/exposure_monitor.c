@@ -62,6 +62,7 @@ typedef struct
   RPT_reporting_t  **cumul_num_animals_exposed_by_prodtype;
   RPT_reporting_t ***cumul_num_animals_exposed_by_cause_and_prodtype;
   RPT_reporting_t   *num_adequate_exposures;
+  RPT_reporting_t  **num_adequate_exposures_by_cause;
   RPT_reporting_t   *cumul_num_adequate_exposures;
   RPT_reporting_t  **cumul_num_adequate_exposures_by_cause;
   GPtrArray *daily_outputs; /**< Daily outputs, in a list to make it easy to
@@ -215,6 +216,7 @@ handle_exposure_event (struct adsm_module_t_ *self, EVT_exposure_event_t * event
       if (event->adequate)
         {
           RPT_reporting_add_integer (local_data->num_adequate_exposures, 1);
+          RPT_reporting_add_integer (local_data->num_adequate_exposures_by_cause[cause], 1);
           RPT_reporting_add_integer (local_data->cumul_num_adequate_exposures, 1);
           RPT_reporting_add_integer (local_data->cumul_num_adequate_exposures_by_cause[cause], 1);
         }
@@ -432,6 +434,11 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
         RPT_NoSubcategory, NULL, 0,
         self->outputs, local_data->daily_outputs },
 
+      { &local_data->num_adequate_exposures_by_cause, "adqnU%s", RPT_integer,
+        RPT_CharArray, ADSM_contact_type_abbrev, ADSM_NCONTACT_TYPES,
+        RPT_NoSubcategory, NULL, 0,
+        self->outputs, local_data->daily_outputs },
+
       { &local_data->cumul_num_adequate_exposures, "adqcU", RPT_integer,
         RPT_NoSubcategory, NULL, 0,
         RPT_NoSubcategory, NULL, 0,
@@ -457,6 +464,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
           g_ptr_array_remove_fast (self->outputs, local_data->cumul_num_units_exposed_by_cause[cause] );
           g_ptr_array_remove_fast (self->outputs, local_data->num_animals_exposed_by_cause[cause] );
           g_ptr_array_remove_fast (self->outputs, local_data->cumul_num_animals_exposed_by_cause[cause] );
+          g_ptr_array_remove_fast (self->outputs, local_data->num_adequate_exposures_by_cause[cause] );
           g_ptr_array_remove_fast (self->outputs, local_data->cumul_num_adequate_exposures_by_cause[cause] );
           for (prodtype = 0; prodtype < nprodtypes; prodtype++)
             {
