@@ -615,7 +615,7 @@ PAR_get_PDF (sqlite3 *db, guint id)
 
   args.db = db;
   args.dist = NULL;
-  query = g_strdup_printf ("SELECT equation_type,mean,std_dev,min,mode,max,alpha,alpha2,beta,location,scale,shape,n,p,m,d,theta,a,s,graph_id FROM ScenarioCreator_probabilityfunction WHERE id=%u", id);
+  query = g_strdup_printf ("SELECT equation_type,mean,std_dev,min,mode,max,alpha,alpha2,beta,location,scale,shape,n,p,m,d,theta,a,s,graph_id FROM ScenarioCreator_probabilitydensityfunction WHERE id=%u", id);
   sqlite3_exec_dict (db, query, PAR_get_PDF_callback, &args, &sqlerr);
   if (sqlerr)
     {
