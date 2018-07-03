@@ -457,7 +457,7 @@ adsm_read_priority_order (sqlite3 *params)
 
   /* First find out if reason has priority over production type. */
   sqlite3_exec_dict (params,
-                     "SELECT destruction_priority_order FROM ScenarioCreator_controlmasterplan",
+                     "SELECT destruction_priority_order FROM ScenarioCreator_destructionglobal",
                      read_primary_order_callback, &reason_has_priority_over_prodtype, &sqlerr);
   if (sqlerr)
     {
@@ -473,7 +473,7 @@ adsm_read_priority_order (sqlite3 *params)
   /* Next get the relative ordering of reasons. */
   reason_order = g_new0 (ADSM_control_reason, ADSM_NCONTROL_REASONS);
   sqlite3_exec_dict (params,
-                     "SELECT destruction_reason_order FROM ScenarioCreator_controlmasterplan",
+                     "SELECT destruction_reason_order FROM ScenarioCreator_destructionglobal",
                      read_reason_order_callback, reason_order, &sqlerr);
   if (sqlerr)
     {

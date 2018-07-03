@@ -2696,9 +2696,6 @@ set_global_params (void *data, GHashTable *dict)
   sqlite3 *params;
   char *tmp_text;
   guint rel_id;
-  double dummy;
-  gchar **tokens, **iter;
-  guint ntokens;
 
   #if DEBUG
     g_debug ("----- ENTER set_global_params (%s)", MODEL_NAME);
@@ -2711,78 +2708,7 @@ set_global_params (void *data, GHashTable *dict)
   params = args->db;
   error = args->error;
 
-  g_assert (g_hash_table_size (dict) == 7);
-
-  tmp_text = g_hash_table_lookup (dict, "destruction_program_delay");
-  if (tmp_text != NULL)
-    {
-      errno = 0;
-      local_data->destruction_program_delay = (int) strtol (tmp_text, NULL, /* base */ 10);
-      g_assert (errno != ERANGE && errno != EINVAL);
-    }
-  else
-    {
-      local_data->destruction_program_delay = 0;
-    }
-
-  tmp_text = g_hash_table_lookup (dict, "destruction_capacity_id");
-  if (tmp_text != NULL)
-    {
-      errno = 0;
-      rel_id = strtol (tmp_text, NULL, /* base */ 10);
-      g_assert (errno != ERANGE && errno != EINVAL);  
-      local_data->destruction_capacity = PAR_get_relchart (params, rel_id);
-    }
-  else
-    {
-      local_data->destruction_capacity = REL_new_point_chart (0);
-    }
-  /* Set a flag if the destruction capacity chart at some point drops to 0 and
-   * stays there. */
-  local_data->destruction_capacity_goes_to_0 =
-    REL_chart_zero_at_right (local_data->destruction_capacity, &dummy);
-  if (local_data->destruction_capacity_goes_to_0)
-    {
-      local_data->destruction_capacity_0_day = (int) ceil (dummy) - 1;
-      #if DEBUG
-        g_debug ("destruction capacity drops to 0 on and after day %i",
-                 local_data->destruction_capacity_0_day);
-      #endif
-    }
-
-  /* The destruction priority order is given in a comma-separated string in the
-   * column "destruction_priority_order". */
-  tmp_text = g_hash_table_lookup (dict, "destruction_priority_order");
-  tokens = g_strsplit (tmp_text, ",", 0);
-  /* Go through the comma-separated tokens and see if they match what is
-   * expected. */ 
-  local_data->destruction_prod_type_priority = 0;
-  local_data->destruction_reason_priority = 0;
-  local_data->destruction_time_waiting_priority = 0;
-  for (iter = tokens, ntokens = 0; *iter != NULL; iter++)
-    {
-      ntokens++;
-      g_strstrip (*iter);
-      if (g_ascii_strcasecmp(*iter, "production type") == 0)
-        local_data->destruction_prod_type_priority = ntokens;
-      else if (g_ascii_strcasecmp(*iter, "reason") == 0)
-        local_data->destruction_reason_priority = ntokens;
-      else if (g_ascii_strcasecmp(*iter, "time waiting") == 0)
-        local_data->destruction_time_waiting_priority = ntokens;
-    }
-  /* At the end of that loop, we should have counted 3 tokens, and filled in a
-   * nonzero value for each of the destruction_XXX_priority variables. */
-  if (!(ntokens == 3
-        && local_data->destruction_prod_type_priority > 0
-        && local_data->destruction_reason_priority > 0
-        && local_data->destruction_time_waiting_priority > 0))
-    {
-      g_set_error (error, ADSM_MODULE_ERROR, 0,
-                   "\"%s\" is not a valid destruction priority order: "
-                   "must be some ordering of reason, time waiting, production type",
-                   tmp_text);
-    }
-  g_strfreev (tokens);
+  g_assert (g_hash_table_size (dict) == 4);
 
   tmp_text = g_hash_table_lookup (dict, "vaccination_capacity_id");
   if (tmp_text != NULL)
@@ -2911,6 +2837,124 @@ set_global_params (void *data, GHashTable *dict)
 
   #if DEBUG
     g_debug ("----- EXIT set_global_params (%s)", MODEL_NAME);
+  #endif
+
+  return 0;
+}
+
+
+
+/**
+ * Reads the global destruction parameters for a resources and implementation
+ * of controls model.
+ *
+ * @param data a set_params_args_t structure, containing this module ("self")
+ *   and a GError pointer to fill in if errors occur.
+ * @param dict the SQL query result as a GHashTable in which key = colname,
+ *   value = value, both in (char *) format.
+ * @return 0
+ */
+static int
+set_global_destruction_params (void *data, GHashTable *dict)
+{
+  set_params_args_t *args;
+  adsm_module_t *self;
+  GError **error;
+  local_data_t *local_data;
+  UNT_unit_list_t *units;
+  sqlite3 *params;
+  char *tmp_text;
+  guint rel_id;
+  double dummy;
+  gchar **tokens, **iter;
+  guint ntokens;
+
+  #if DEBUG
+    g_debug ("----- ENTER set_global_destruction_params (%s)", MODEL_NAME);
+  #endif
+
+  args = data;
+  self = args->self;
+  local_data = (local_data_t *) (self->model_data);
+  units = args->units;
+  params = args->db;
+  error = args->error;
+
+  g_assert (g_hash_table_size (dict) == 3);
+
+  tmp_text = g_hash_table_lookup (dict, "destruction_program_delay");
+  if (tmp_text != NULL)
+    {
+      errno = 0;
+      local_data->destruction_program_delay = (int) strtol (tmp_text, NULL, /* base */ 10);
+      g_assert (errno != ERANGE && errno != EINVAL);
+    }
+  else
+    {
+      local_data->destruction_program_delay = 0;
+    }
+
+  tmp_text = g_hash_table_lookup (dict, "destruction_capacity_id");
+  if (tmp_text != NULL)
+    {
+      errno = 0;
+      rel_id = strtol (tmp_text, NULL, /* base */ 10);
+      g_assert (errno != ERANGE && errno != EINVAL);  
+      local_data->destruction_capacity = PAR_get_relchart (params, rel_id);
+    }
+  else
+    {
+      local_data->destruction_capacity = REL_new_point_chart (0);
+    }
+  /* Set a flag if the destruction capacity chart at some point drops to 0 and
+   * stays there. */
+  local_data->destruction_capacity_goes_to_0 =
+    REL_chart_zero_at_right (local_data->destruction_capacity, &dummy);
+  if (local_data->destruction_capacity_goes_to_0)
+    {
+      local_data->destruction_capacity_0_day = (int) ceil (dummy) - 1;
+      #if DEBUG
+        g_debug ("destruction capacity drops to 0 on and after day %i",
+                 local_data->destruction_capacity_0_day);
+      #endif
+    }
+
+  /* The destruction priority order is given in a comma-separated string in the
+   * column "destruction_priority_order". */
+  tmp_text = g_hash_table_lookup (dict, "destruction_priority_order");
+  tokens = g_strsplit (tmp_text, ",", 0);
+  /* Go through the comma-separated tokens and see if they match what is
+   * expected. */ 
+  local_data->destruction_prod_type_priority = 0;
+  local_data->destruction_reason_priority = 0;
+  local_data->destruction_time_waiting_priority = 0;
+  for (iter = tokens, ntokens = 0; *iter != NULL; iter++)
+    {
+      ntokens++;
+      g_strstrip (*iter);
+      if (g_ascii_strcasecmp(*iter, "production type") == 0)
+        local_data->destruction_prod_type_priority = ntokens;
+      else if (g_ascii_strcasecmp(*iter, "reason") == 0)
+        local_data->destruction_reason_priority = ntokens;
+      else if (g_ascii_strcasecmp(*iter, "time waiting") == 0)
+        local_data->destruction_time_waiting_priority = ntokens;
+    }
+  /* At the end of that loop, we should have counted 3 tokens, and filled in a
+   * nonzero value for each of the destruction_XXX_priority variables. */
+  if (!(ntokens == 3
+        && local_data->destruction_prod_type_priority > 0
+        && local_data->destruction_reason_priority > 0
+        && local_data->destruction_time_waiting_priority > 0))
+    {
+      g_set_error (error, ADSM_MODULE_ERROR, 0,
+                   "\"%s\" is not a valid destruction priority order: "
+                   "must be some ordering of reason, time waiting, production type",
+                   tmp_text);
+    }
+  g_strfreev (tokens);
+
+  #if DEBUG
+    g_debug ("----- EXIT set_global_destruction_params (%s)", MODEL_NAME);
   #endif
 
   return 0;
@@ -3068,11 +3112,21 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   set_params_args.db = params;
   set_params_args.error = error;
   sqlite3_exec_dict (params,
-                     "SELECT destruction_program_delay,destruction_capacity_id,destruction_priority_order,"
-                     "vaccination_capacity_id,restart_vaccination_capacity_id,vaccination_priority_order,"
+                     "SELECT vaccination_capacity_id,restart_vaccination_capacity_id,vaccination_priority_order,"
                      "vaccinate_retrospective_days "
                      "FROM ScenarioCreator_controlmasterplan",
                      set_global_params, &set_params_args, &sqlerr);
+  if (sqlerr)
+    {
+      g_error ("%s", sqlerr);
+    }
+
+  /* Call the set_global_destruction_params function to read the destruction
+   * parameters which reside in their own table. */
+  sqlite3_exec_dict (params,
+                     "SELECT destruction_program_delay,destruction_capacity_id,destruction_priority_order "
+                     "FROM ScenarioCreator_destructionglobal",
+                     set_global_destruction_params, &set_params_args, &sqlerr);
   if (sqlerr)
     {
       g_error ("%s", sqlerr);
