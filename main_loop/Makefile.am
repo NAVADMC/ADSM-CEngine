@@ -100,6 +100,6 @@ if USE_SC_GUILIB
     $(top_srcdir)/sc_guilib/sc_database.h
 endif
 
-bin_PROGRAMS = adsm
-adsm_SOURCES = cli.c
-adsm_LDADD = libadsm.a @GLIB_LIBS@ @GSL_LIBS@ @SQLITE_LIBS@ @JSON_GLIB_LIBS@
+bin_PROGRAMS = adsm_simulation
+adsm_simulation_SOURCES = cli.c
+adsm_simulation_LDADD = libadsm.a @GLIB_LIBS@ @GSL_LIBS@ @SQLITE_LIBS@ @JSON_GLIB_LIBS@
