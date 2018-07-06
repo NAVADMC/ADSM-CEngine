@@ -28,6 +28,7 @@ Exactly follow these steps to compile the CEngine Executable for Windows.
 1. Close the terminal and reopen it
 1. `pacman -Su`  
 1. `pacman -S pkg-config autoconf automake-wrapper gcc make bison python glib2-devel mingw-w64-x86_64-gd mingw-w64-x86_64-gsl libsqlite-devel mingw-w64-x86_64-shapelib mingw-w64-x86_64-json-glib`
+1. `pacman -U http://repo.msys2.org/mingw/x86_64/mingw-w64-x86_64-json-glib-1.2.8-1-any.pkg.tar.xz`
 1. `ln -s /mingw64/include/json-glib-1.0/json-glib /mingw64/include/json-glib`
 1. Close the terminal
 1. Download the General Polygon Clipper Library (GPC): http://www.cs.man.ac.uk/~toby/gpc/assets/gpc232-release.zip
