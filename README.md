@@ -65,9 +65,9 @@ Exactly follow these steps to compile the CEngine Executable for Windows.
 1. `./configure --disable-debug`  
 1. `make`  
    * The make command will build the ADSM executables but then stop on an error when it reaches the doc/diagrams directory (the free diagramming tool Dia is not available as a precompiled MSYS2 package)
-   * The compiled output will be './main_loop/adsm.exe'
+   * The compiled output will be './main_loop/adsm_simulation.exe'
    * **NOTE:** You won't be able to run the output in place as it needs to be in the same directory as some dependent dll files (which are in the main ADSM repo already).
-1. Take the './main_loop/adsm.exe' file and put it into ADSM Frontend application in 'ADSM/bin/' and rename it to 'adsm_simulation.exe'.
+1. Take the './main_loop/adsm_simulation.exe' file and put it into ADSM Frontend application in 'ADSM/bin/'.
 1. If once in the 'ADSM/bin' folder it won't run due to a missing dependency, look for the proper dll in your msys installation folders and move it to be alongside the 'adsm_simulation.exe' file in the 'ADSM/bin' folder
 
 ### x86-64 Debian Linux (Ubuntu preferred)
@@ -101,11 +101,11 @@ Follow these steps to compile the CEngine Executable for Linux.
    1. `ln -s /usr/bin/python3 /usr/bin/python`
 1. `make`
    * The make command will build the ADSM executables but then stop on an error when it reaches the doc/diagrams directory (compiling the free diagramming tool Dia is not covered here)
-   * The compiled output will be './main_loop/adsm'
+   * The compiled output will be './main_loop/adsm_simulation'
 1. Undo your python change
    1. `rm /usr/bin/python`
    1. `mv /usr/bin/python-back /usr/bin/python`
-1. Take the './main_loop/adsm' file and put it into ADSM Frontend application in 'ADSM/bin/' and rename it to 'adsm_simulation'.
+1. Take the './main_loop/adsm_simulation' file and put it into ADSM Frontend application in 'ADSM/bin/'.
 1. **WARNING** The 'adsm_simulation' will properly run on your system once in 'ADSM/bin/'.  
    HOWEVER! It will NOT run on another system that doesn't have the proper dependencies installed already (in exactly the correct location).  
    This is due to this compilation process not being statically linked and is the reason why distribution on Linux is not yet supported.
