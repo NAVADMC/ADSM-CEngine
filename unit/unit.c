@@ -1061,8 +1061,12 @@ UNT_load_unit_callback (void *data, GHashTable *dict)
         errno = 0;
         tmp = strtol (days, NULL, /* base */ 10);
         g_assert (errno != ERANGE && errno != EINVAL);
-        g_assert (0 <= tmp && tmp <= INT_MAX);
-        unit->days_in_initial_state = (int) tmp;
+        /* A negative number is ignored */
+        if (tmp >= 0)
+          {
+            g_assert (tmp <= INT_MAX);
+            unit->days_in_initial_state = (int) tmp;
+          }
       }
 
     days = g_hash_table_lookup (dict, "days_left_in_initial_state");        
@@ -1071,8 +1075,12 @@ UNT_load_unit_callback (void *data, GHashTable *dict)
         errno = 0;
         tmp = strtol (days, NULL, /* base */ 10);
         g_assert (errno != ERANGE && errno != EINVAL);
-        g_assert (0 <= tmp && tmp <= INT_MAX);
-        unit->days_left_in_initial_state = (int) tmp;
+        /* A negative number is ignored */
+        if (tmp >= 0)
+          {
+            g_assert (tmp <= INT_MAX);
+            unit->days_left_in_initial_state = (int) tmp;
+          }
       }
   }
 
