@@ -147,7 +147,7 @@ handle_before_each_simulation_event (struct adsm_module_t_ * self,
   g_free (tmp_filename);
 
   g_io_channel_write_chars (local_data->channel,
-                            "run,day,herdID_general,status,Lat,Lon\n",
+                            "run,day,ID,status,Lat,Lon\n",
                             -1 /* assume null-terminated string */, NULL, &error);
   g_io_channel_flush (local_data->channel, &error);
 
