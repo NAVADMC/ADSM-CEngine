@@ -24,11 +24,11 @@ Exactly follow these steps to compile the CEngine Executable for Windows.
 
 1. Download and install msys2: http://repo.msys2.org/distrib/x86_64/msys2-x86_64-20161025.exe  
    **NOTE:** the home direcotry when in the msys shell is shows as '/home/username'; this directory is located at 'C:\msys2\home\username'
-1. Open the msys terminal and run `pacman -Syu`
-1. Close the terminal and reopen it
+1. Open the msys2 terminal (NOT mingw) and run `pacman -Syu`
+1. Close the terminal and reopen it. Note: It may be hard to force close the terminal, but this is the correct step
 1. `pacman -Su`  
 1. Install packages needed by ADSM. The file pkglist.txt contains version numbers taken from a working system. For the most part, newer versions with the same major version number should work, although note that we have encountered memory errors when using versions of JSON-GLib above 1.2.  
-`pacman -S pkg-config autoconf automake-wrapper gcc make bison python glib2-devel mingw-w64-x86_64-gd mingw-w64-x86_64-gsl libsqlite-devel mingw-w64-x86_64-shapelib mingw-w64-x86_64-json-glib`
+    1. `pacman -S - < /path/to/pkglist.txt`
 1. `ln -s /mingw64/include/json-glib-1.0/json-glib /mingw64/include/json-glib`
 1. Close the terminal
 1. Download the General Polygon Clipper Library (GPC): http://www.cs.man.ac.uk/~toby/gpc/assets/gpc232-release.zip
@@ -70,6 +70,8 @@ Exactly follow these steps to compile the CEngine Executable for Windows.
    * **NOTE:** You won't be able to run the output in place as it needs to be in the same directory as some dependent dll files (which are in the main ADSM repo already).
 1. Take the './main_loop/adsm_simulation.exe' file and put it into ADSM Frontend application in 'ADSM/bin/'.
 1. If once in the 'ADSM/bin' folder it won't run due to a missing dependency, look for the proper dll in your msys installation folders and move it to be alongside the 'adsm_simulation.exe' file in the 'ADSM/bin' folder
+
+**NOTE:** To update the pkglist.txt, in the msys2 terminal, run `pacman -Qe > /path/to/pkglist.txt`
 
 ### x86-64 Debian Linux (Ubuntu preferred)
 Follow these steps to compile the CEngine Executable for Linux.
