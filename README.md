@@ -27,7 +27,8 @@ Exactly follow these steps to compile the CEngine Executable for Windows.
 1. Open the msys terminal and run `pacman -Syu`
 1. Close the terminal and reopen it
 1. `pacman -Su`  
-1. `pacman -S pkg-config autoconf automake-wrapper gcc make bison python glib2-devel mingw-w64-x86_64-gd mingw-w64-x86_64-gsl libsqlite-devel mingw-w64-x86_64-shapelib mingw-w64-x86_64-json-glib`
+1. Install packages needed by ADSM. The file pkglist.txt contains version numbers taken from a working system. For the most part, newer versions with the same major version number should work, although note that we have encountered memory errors when using versions of JSON-GLib above 1.2.  
+`pacman -S pkg-config autoconf automake-wrapper gcc make bison python glib2-devel mingw-w64-x86_64-gd mingw-w64-x86_64-gsl libsqlite-devel mingw-w64-x86_64-shapelib mingw-w64-x86_64-json-glib`
 1. Close the terminal
 1. Download the General Polygon Clipper Library (GPC): http://www.cs.man.ac.uk/~toby/gpc/assets/gpc232-release.zip
 1. Unpack gpc (easiest if you unpack into your msys home directory 'C:\msys2\home\username\') 
