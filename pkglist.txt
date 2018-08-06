@@ -1,0 +1,13 @@
+autoconf 2.69-3
+automake-wrapper 11-1
+bison 3.0.4-1
+gcc 7.3.0-1
+glib2-devel 2.48.2-1
+libsqlite-devel 3.21.0-2
+make 4.2.1-1
+mingw-w64-x86_64-gd 2.2.5-3
+mingw-w64-x86_64-gsl 2.5-1
+mingw-w64-x86_64-json-glib 1.2.8-1
+mingw-w64-x86_64-shapelib 1.4.1-1
+pkg-config 0.29.2-1
+python 3.6.2-1
