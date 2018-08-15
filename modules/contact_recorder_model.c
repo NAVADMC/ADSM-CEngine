@@ -101,17 +101,14 @@ typedef struct
   PDF_dist_t **trace_delay; /**< Number of days that a trace takes.  Use an
     expression of the form trace_delay[source_production_type] to get a
     particular distribution. */
-  GQueue **trace_out; /* Lists of exposures originating <i>from</i> a unit.
-    The array contains one GQueue for each unit.  Each node of a GQueue stores
-    a pointer to an Exposure event.  The newest exposures are at the head of
-    the queue.  The Exposure event objects are shared with trace_in. */
-  GQueue **trace_in;            /* Lists of exposures going <i>to</i> each
-                                   each unit.  The array contains one GQueue for each unit.  Each node of a
-                                   GQueue stores a pointer to an Exposure event.  The exposure event objects
-                                   are shared with trace_out.  Note that we never free an exposure event
-                                   pointed to by trace_in. */
-  unsigned int nunits;          /* Number of units.  Stored here because it is
-                                   also the length of the trace_out and trace_in lists. */
+  GHashTable *trace_out; /**< Lists of exposures originating <i>from</i> a
+    unit.  Keys are units (UNT_unit_t *) and the associated data is a GQueue
+    storing Exposure events (EVT_event_t *).  The newest exposures are at the
+    head of the queue.  The exposure event objects are shared with trace_in. */
+  GHashTable *trace_in; /**< Lists of exposures going <i>to</i> a unit.  Keys
+    are units (UNT_unit_t *) and the associated data is a GQueue storing
+    Exposure events (EVT_event_t *).  The exposure event objects are shared
+    with trace_out so we never free an exposure event pointed to by trace_in. */
   GPtrArray *pending_results; /**< An array to store delayed results.  Each
     item in the array is a GQueue of TraceResult events.  (Actually a singly-
     linked list would suffice, but the GQueue syntax is much more readable than
@@ -146,24 +143,16 @@ handle_before_each_simulation_event (struct adsm_module_t_ *self)
 
   local_data = (local_data_t *) (self->model_data);
 
-  /* Free all nodes in the trace_out lists, and free the exposure events they
-   * point to. */
-  for (i = 0; i < local_data->nunits; i++)
-    {
-      q = local_data->trace_out[i];
-      while (!g_queue_is_empty (q))
-        EVT_free_event ((EVT_event_t *) g_queue_pop_head (q));
-    }
+  /* Free all data in the trace_out lists.  We specified a value_destroy_func
+   * when we created trace_out that will free both the lists and the exposure
+   # events they point to. */
+  g_hash_table_remove_all (local_data->trace_out);
 
-  /* Free all nodes in the trace_in lists, but do not attempt to free the
-   * exposure events they point to.  That has already been done because the
-   * trace_out and trace_in lists share exposure events. */
-  for (i = 0; i < local_data->nunits; i++)
-    {
-      q = local_data->trace_in[i];
-      while (!g_queue_is_empty (q))
-        g_queue_pop_head (q);
-    }
+  /* Free all data in the trace_in lists.  We specified a value_destroy_func
+   * when we created trace_in that will free the lists but not the exposure
+   * events they point to.  That has already been done because the trace_out
+   # and trace_in lists share exposure events. */
+  g_hash_table_remove_all (local_data->trace_in);
 
   for (i = 0; i < local_data->pending_results->len; i++)
     {
@@ -218,14 +207,28 @@ handle_exposure_event (struct adsm_module_t_ *self, EVT_event_t * e)
           if (local_data->trace_success[event->contact_type][event->exposing_unit->production_type] >= 0
               || local_data->trace_success[event->contact_type][event->exposed_unit->production_type] >= 0)
             {
+              GQueue *q;
+
               #if DEBUG
                 g_debug ("recording exposure from unit \"%s\" -> unit \"%s\" on day %i",
                          event->exposing_unit->official_id, event->exposed_unit->official_id, event->day);
               #endif
           
               event_copy = EVT_clone_event (e);
-              g_queue_push_head (local_data->trace_out[event->exposing_unit->index], event_copy);
-              g_queue_push_head (local_data->trace_in[event->exposed_unit->index], event_copy);
+              q = g_hash_table_lookup (local_data->trace_out, event->exposing_unit);
+              if (q == NULL)
+                {
+                  q = g_queue_new ();
+                  g_hash_table_insert (local_data->trace_out, event->exposing_unit, q);
+                }
+              g_queue_push_head (q, event_copy);
+              q = g_hash_table_lookup (local_data->trace_in, event->exposed_unit);
+              if (q == NULL)
+                {
+                  q = g_queue_new ();
+                  g_hash_table_insert (local_data->trace_in, event->exposed_unit, q);
+                }
+              g_queue_push_head (q, event_copy);
             }
         }
     }
@@ -263,7 +266,7 @@ handle_attempt_to_trace_event (struct adsm_module_t_ *self,
   PDF_dist_t *delay_dist;
   int delay;
   int delay_index;
-  GQueue *q;
+  GQueue *q = NULL;
   gboolean trace_successful;
 
 #if DEBUG
@@ -286,19 +289,23 @@ handle_attempt_to_trace_event (struct adsm_module_t_ *self,
    * the same pair of units if A has had contact with B several times in the
    * time period of interest. */
   if (direction == ADSM_TraceBackOrIn)
-    iter = g_queue_peek_head_link (local_data->trace_in[unit->index]);
+    {
+      q = g_hash_table_lookup (local_data->trace_in, unit);
+      iter = (q == NULL) ? NULL : g_queue_peek_head_link (q);
+    }
   else if (direction == ADSM_TraceForwardOrOut)
-    iter = g_queue_peek_head_link (local_data->trace_out[unit->index]);
+    {
+      q = g_hash_table_lookup (local_data->trace_out, unit);
+      iter = (q == NULL) ? NULL : g_queue_peek_head_link (q);
+    }
   else
     iter = NULL;
 
   #if DEBUG
-    if (direction == ADSM_TraceBackOrIn)
-      g_debug ("trace list contains %u records",
-               g_queue_get_length (local_data->trace_in[unit->index]));
-    else if (direction == ADSM_TraceForwardOrOut)
-      g_debug ("trace list contains %u records",
-               g_queue_get_length (local_data->trace_out[unit->index]));
+    if (q != NULL)
+      {
+        g_debug ("trace list contains %u records", g_queue_get_length (q));
+      }
   #endif
 
   for (; iter != NULL; iter = g_list_next (iter))
@@ -604,21 +611,8 @@ local_free (struct adsm_module_t_ *self)
     PDF_free_dist (local_data->trace_delay[i]);
   g_free (local_data->trace_delay);
 
-  for (i = 0; i < local_data->nunits; i++)
-    {
-      q = local_data->trace_out[i];
-      while (!g_queue_is_empty (q))
-        EVT_free_event ((EVT_event_t *) g_queue_pop_head (q));
-      g_queue_free (q);
-    }
-  g_free (local_data->trace_out);
-
-  for (i = 0; i < local_data->nunits; i++)
-    {
-      q = local_data->trace_in[i];
-      g_queue_free (q);
-    }
-  g_free (local_data->trace_in);
+  g_hash_table_destroy (local_data->trace_out);
+  g_hash_table_destroy (local_data->trace_in);
 
   for (i = 0; i < local_data->pending_results->len; i++)
     {
@@ -726,6 +720,18 @@ set_params (void *data, GHashTable *dict)
 
 
 /**
+ * Fully free a GQueue that contains EVT_event_t objects.  Used as the
+ * value_destroy_func for local_data->trace_out.
+ */
+void
+g_queue_free_full_event (GQueue *queue)
+{
+  g_queue_free_full (queue, (GDestroyNotify) EVT_free_event);
+}
+
+
+
+/**
  * Returns a new contact recorder model.
  */
 adsm_module_t *
@@ -791,16 +797,19 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   local_data->npending_results = 0;
   local_data->rotating_index = 0;
 
-  local_data->nunits = UNT_unit_list_length (units);
-
-  /* No exposures have been tracked yet. */
-  local_data->trace_out = g_new0 (GQueue *, local_data->nunits);
-  local_data->trace_in = g_new0 (GQueue *, local_data->nunits);
-  for (i = 0; i < local_data->nunits; i++)
-    {
-      local_data->trace_out[i] = g_queue_new ();
-      local_data->trace_in[i] = g_queue_new ();
-    }
+  /* No exposures have been tracked yet.
+   * Note the different value_destroy_funcs.  Exposure event objects are shared
+   * between the lists held in trace_out and trace_in.  To avoid double
+   * freeing, the exposure event objects are freed when removed from trace_out
+   * but not trace_in.  */
+  local_data->trace_out =
+    g_hash_table_new_full (g_direct_hash, g_direct_equal,
+                           /* key_destroy_func = */ NULL,
+                           /* value_destroy_func = */ (GDestroyNotify) g_queue_free_full_event);
+  local_data->trace_in =
+    g_hash_table_new_full (g_direct_hash, g_direct_equal,
+                           /* key_destroy_func = */ NULL,
+                           /* value_destroy_func = */ (GDestroyNotify) g_queue_free);
 
   local_data->trace_period = PAR_get_int (params, "SELECT MAX(trace_period) FROM (SELECT direct_trace_period AS trace_period FROM ScenarioCreator_controlprotocol UNION SELECT indirect_trace_period AS trace_period FROM ScenarioCreator_controlprotocol)");
 
