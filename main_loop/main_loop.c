@@ -341,32 +341,6 @@
  *
  * <table>
  *   <tr>
- *     <td><b>Component:</b></td> <td>GD graphics library</a></td>
- *   </tr>
- *   <tr>
- *     <td><b>Used for:</b></td> <td>quick rendering of maps</td>
- *   </tr>
- *   <tr>
- *     <td><b>Author:</b></td> <td>Thomas Boutell et al.</td>
- *   </tr>
- *   <tr>
- *     <td><b>License:</b></td>
- *     <td>
- *       "Permission has been granted to copy, distribute and modify gd in any
- *       context without fee, including a commercial application"
- *       [<a href="http://www.boutell.com/gd/manual2.0.33.html#notice">read full text</a>]
- *     </td>
- *   </tr>
- *   <tr>
- *     <td><b>Website:</b></td>
- *     <td>
- *       <a href="http://www.boutell.com/gd/">http://www.boutell.com/gd/</a>
- *     </td>
- *   </tr>
- * </table>
- *
- * <table>
- *   <tr>
  *     <td><b>Component:</b></td> <td>General Polygon Clipper (gpc)</a></td>
  *   </tr>
  *   <tr>
