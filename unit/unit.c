@@ -1038,7 +1038,7 @@ UNT_load_unit_callback (void *data, GHashTable *dict)
   }
   
   /* Official ID (arbitrary name attached to this unit) */
-  unit->official_id = g_strdup (g_hash_table_lookup (dict, "user_notes"));
+  unit->official_id = g_strdup (g_hash_table_lookup (dict, "unit_id"));
 
   /* Database ID */
   {
