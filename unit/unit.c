@@ -1153,7 +1153,7 @@ UNT_load_unit_list (sqlite3 *db, gboolean production_types_only)
    * types, not the units. */
   if (!production_types_only)
     {
-      sqlite3_exec_dict (db, "SELECT unit.id,name,latitude,longitude,initial_state,days_in_initial_state,days_left_in_initial_state,initial_size,user_notes FROM ScenarioCreator_unit unit,ScenarioCreator_productiontype prodtype where unit.production_type_id=prodtype.id",
+      sqlite3_exec_dict (db, "SELECT unit.id,name,latitude,longitude,initial_state,days_in_initial_state,days_left_in_initial_state,initial_size,user_notes,unit_id FROM ScenarioCreator_unit unit,ScenarioCreator_productiontype prodtype where unit.production_type_id=prodtype.id",
                          UNT_load_unit_callback, units, &sqlerr);
     }
   else
