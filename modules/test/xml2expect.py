@@ -104,7 +104,7 @@ expect_after {
 		category = getText (test.getElementsByTagName ("category")[0])
 		parameterFileName = getText (test.getElementsByTagName ("parameter-file")[0])
 		populationFileName = getText (test.getElementsByTagName ("population-file")[0])
-		print('set scenario "test/module.%s/%s_%s.sqlite3"' % (category, parameterFileName, populationFileName))
+		print('set scenario "test/module.%s/%s_%s.db"' % (category, parameterFileName, populationFileName))
 
 		table = test.getElementsByTagName ("output")[0]
 		print('set states {')
@@ -132,7 +132,7 @@ expect_after {
 		category = getText (test.getElementsByTagName ("category")[0])
 		parameterFileName = getText (test.getElementsByTagName ("parameter-file")[0])
 		populationFileName = getText (test.getElementsByTagName ("population-file")[0])
-		print('set scenario "test/module.%s/%s_%s.sqlite3"' % (category, parameterFileName, populationFileName))
+		print('set scenario "test/module.%s/%s_%s.db"' % (category, parameterFileName, populationFileName))
 
 		tables = test.getElementsByTagName ("output")
 		print('set states {')
@@ -163,7 +163,7 @@ expect_after {
 		category = getText (test.getElementsByTagName ("category")[0])
 		parameterFileName = getText (test.getElementsByTagName ("parameter-file")[0])
 		populationFileName = getText (test.getElementsByTagName ("population-file")[0])
-		print('set scenario "test/module.%s/%s_%s.sqlite3"' % (category, parameterFileName, populationFileName))
+		print('set scenario "test/module.%s/%s_%s.db"' % (category, parameterFileName, populationFileName))
 
 		table = test.getElementsByTagName ("output")[0]
 		rows = table.getElementsByTagName ("tr")
@@ -198,7 +198,7 @@ expect_after {
 		category = getText (test.getElementsByTagName ("category")[0])
 		parameterFileName = getText (test.getElementsByTagName ("parameter-file")[0])
 		populationFileName = getText (test.getElementsByTagName ("population-file")[0])
-		print('set scenario "test/module.%s/%s_%s.sqlite3"' % (category, parameterFileName, populationFileName))
+		print('set scenario "test/module.%s/%s_%s.db"' % (category, parameterFileName, populationFileName))
 		tables = test.getElementsByTagName ("output")
 
 		print('set values {')
