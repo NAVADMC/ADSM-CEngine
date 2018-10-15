@@ -29,7 +29,8 @@ Exactly follow these steps to compile the CEngine Executable for Windows.
 1. `pacman -Su`  
 1. Install build tools needed by ADSM.  
 `pacman -S pkg-config autoconf automake-wrapper gcc make bison python`
-1. Install packages needed by ADSM. Specific versions should be installed and newer versions should be tested before the version numbers are incremented in these instructions.  
+1. Install packages needed by ADSM. Specific versions should be installed and newer versions should be tested before the version numbers are incremented in these instructions.
+`pacman -U http://repo.msys2.org/msys/x86_64/glib2-2.48.2-1-x86_64.pkg.tar.xz`  
 `pacman -U http://repo.msys2.org/msys/x86_64/glib2-devel-2.48.2-1-x86_64.pkg.tar.xz`  
 `pacman -U http://repo.msys2.org/mingw/x86_64/mingw-w64-x86_64-gsl-2.5-1-any.pkg.tar.xz`  
 `pacman -U http://repo.msys2.org/msys/x86_64/libsqlite-devel-3.21.0-2-x86_64.pkg.tar.xz`  
