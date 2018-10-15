@@ -14,6 +14,8 @@ __date__ = "December 2003"
 
 import sys
 import xml.dom.minidom
+import sqlite3
+import os
 
 
 
@@ -25,6 +27,25 @@ def getText (element):
 		if node.nodeType == node.TEXT_NODE:
 			text += node.data
 	return text.strip()
+
+
+
+def getUnitNames (parameterFileName, populationFileName):
+	"""Return an array of strings, giving the names of units in the population
+	file in the order they appear."""
+	# Check for a database file first
+	try:
+		uri = 'file:' + parameterFileName + '_' + populationFileName + '.db?mode=rw'
+		conn = sqlite3.connect(uri, uri=True)
+		names = [row[0] for row in conn.execute('SELECT unit_id FROM ScenarioCreator_unit')]
+	except sqlite3.OperationalError:
+	    # Try for an XML population file
+		try:
+			doc = xml.dom.minidom.parse(os.path.join(os.pardir, populationFileName + '.xml'))
+			names = [getText(node) for node in doc.getElementsByTagName ("id")]
+		except IOError:
+			names = None
+	return names
 
 
 
@@ -104,13 +125,18 @@ expect_after {
 		category = getText (test.getElementsByTagName ("category")[0])
 		parameterFileName = getText (test.getElementsByTagName ("parameter-file")[0])
 		populationFileName = getText (test.getElementsByTagName ("population-file")[0])
+		unitNames = getUnitNames (parameterFileName, populationFileName)
 		print('set scenario "test/module.%s/%s_%s.db"' % (category, parameterFileName, populationFileName))
 
 		table = test.getElementsByTagName ("output")[0]
-		print('set states {')
-		for row in table.getElementsByTagName ("tr"):
-			print('  {', ' '.join(rowToStates (row, state_code)), '}')
-		print('}')
+		rows = [rowToStates(row, state_code)
+		        for row in table.getElementsByTagName ("tr")]
+		print('set states [dict create \\')
+		for i in range(len(unitNames)):
+			print('  "%s" {' % unitNames[i], end=' ')
+			print(' '.join([row[i] for row in rows]), end=' ')
+			print('} \\')
+		print(']')
 
 		shortName = getText (test.getElementsByTagName ("short-name")[0])
 		print('progress_test $scenario $states "%s"' % shortName)

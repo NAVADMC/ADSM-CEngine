@@ -126,10 +126,11 @@ proc simvaroutput_string_to_list { s } {
 # 1,3,a,N,0.0,0.0
 # 1,3,b,L,0.0,0.1
 #
-# (This represents unit "a" going from Latent to Clinical to Naturally Immune,
-# and unit "b" becoming Latent on day 3).
+# will be returned as a dict where key "a" has value {L C N} and key "b" has
+# value {S S L}.
 #
-# will be returned as { {a L C N} {b S S L} }
+# (This represents herd "a" going from Latent to Clinical to Naturally Immune,
+# and herd "b" becoming Latent on day 3).
 #
 # Note that the Susceptible status for b was never explicitly given but it
 # will be added to make the days line up.
@@ -144,39 +145,29 @@ proc simstateoutput_string_to_list { s } {
     #
     set s [split $s "\n"]
     #
-    # Process each line. Use a temporary associative array "tmp" where key=unit
-    # name and value=list of states.
+    # Process each line. Use a dict "result" where key=herd and value=list of
+    # states.
     #
+    set result [dict create]
     for {set i 1} {$i < [llength $s]} {incr i} {
         set line [lindex $s $i]
         set columns [split $line ","]
-        set unit_name [lindex $columns 2]
-        # Retrieve list of statuses for this unit from associative array OR
-        # create new empty list
-        if {[info exists tmp($unit_name)]} {
-            set unit_statuses $tmp($unit_name)
+        set herd [lindex $columns 2]
+        # Retrieve list of states for this herd from dict OR create new empty
+        # list
+        if {[dict exists $result $herd]} {
+            set herd_states [dict get $result $herd]
         } else {
-            set unit_statuses [list]
+            set herd_states [list]
         }
-        # We may need to pad the list of unit_statuses with S (Susceptible)
+        # We may need to pad the list of herd_states with S (Susceptible)
         set day [lindex $columns 1]
-        while {[llength $unit_statuses] < [expr $day - 1]} {
-            lappend unit_statuses "S"
+        while {[llength $herd_states] < [expr $day - 1]} {
+            lappend herd_states "S"
         }
-        set status [lindex $columns 3]
-        lappend unit_statuses $status
-        set tmp($unit_name) $unit_statuses
-    }
-    #
-    # Change the associative array into a plain list.
-    #
-    set result {}
-    set unit_names [array names tmp]
-    for {set i 0} {$i < [llength $unit_names]} {incr i} {
-        set unit_name [lindex $unit_names $i]
-        set unit_statuses $tmp($unit_name)
-        set values [concat [list $unit_name] $unit_statuses]
-        lappend result $values
+        set state [lindex $columns 3]
+        lappend herd_states $state
+        dict set result $herd $herd_states        
     }
     return $result
 }
@@ -200,34 +191,59 @@ proc progress_test { scenario answer {test "progress"} } {
 	global state_code
 	global verbose
 
-	set true_ndays [llength $answer]
-	set true_nherds [llength [lindex $answer 0]]
+    set true_herds [dict keys $answer]
+    set first_herd [lindex $true_herds 0]
+	set true_ndays [llength [dict get $answer $first_herd]]
 	send "$scenario\n"
 	expect {
 		-re "($tablelinespat).*$prompt$" {
 			set output [simstateoutput_string_to_list $expect_out(1,string)]
 
 			#
-			# Check that the output has the correct number of days and herds.
+			# Check that the output has the correct number of days.
 			#
-			set ndays [expr [llength [lindex $output 0]] - 1]
+			set output_herds [dict keys $output]
+			set first_name [lindex $output_herds 0]
+			set ndays [llength [dict get $output $first_name]]
 			if { $ndays != $true_ndays } {
 				fail "$test output should have $true_ndays days, not $ndays"
 				return
 			}
-			set nherds [llength $output]
-			if { $nherds != $true_nherds } {
-				fail "$test output should have $true_nherds herds, not $nherds"
-				return
-			}
+			#
+			# The number of herds may differ in the output and the answer,
+			# because herds that are Susceptible throughout the simulation will
+			# not appear in the output.
+			#
 			
 			#
 			# Check that individual states are correct.
 			#
 			for {set day 0} {$day < $true_ndays} {incr day} {
-				for {set herd 0} {$herd < $true_nherds} {incr herd} {
-					set true_state [lindex [lindex $answer $day] $herd]
-					set state [lindex [lindex $output $herd] [expr $day + 1]]
+				foreach herd [dict keys $answer] {
+					set true_state [lindex [dict get $answer $herd] $day]
+					set is_susceptible [expr [string compare $true_state "S"] == 0]
+					# If that herd does not exist in the output, that's OK as
+					# long as the true state is S.
+					if { ![dict exists $output $herd] } {
+						if { $is_susceptible } {
+							continue
+						} else {
+							fail "$test on day $day herd $herd should be in state $true_state, not $state"
+							return
+						}
+					}
+					# If that herd doesn't have a state for the current day in
+					# the output, that's OK as long as the true state is S.
+					set herd_states [dict get $output $herd]
+					if { [llength $herd_states] <= $day } {
+						if { $is_susceptible } {
+							continue
+						} else {
+							fail "$test on day $day herd $herd should be in state $true_state, not S"
+							return
+						}
+					}
+					set state [lindex [dict get $output $herd] $day]
 					if { [string compare $true_state $state] != 0 } {
 						fail "$test on day $day herd $herd should be in state $true_state, not $state"
 						return
