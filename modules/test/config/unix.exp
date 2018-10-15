@@ -117,6 +117,73 @@ proc simvaroutput_string_to_list { s } {
 
 
 #
+# Turns simulation output in state table form into a Tcl list.  For example,
+# the output
+#
+# run,day,ID,status,Lat,Lon
+# 1,1,a,L,0.0,0.0
+# 1,2,a,C,0.0,0.0
+# 1,3,a,N,0.0,0.0
+# 1,3,b,L,0.0,0.1
+#
+# (This represents unit "a" going from Latent to Clinical to Naturally Immune,
+# and unit "b" becoming Latent on day 3).
+#
+# will be returned as { {a L C N} {b S S L} }
+#
+# Note that the Susceptible status for b was never explicitly given but it
+# will be added to make the days line up.
+#
+proc simstateoutput_string_to_list { s } {
+    #
+    # Get rid of carriage returns and any trailing newlines.
+    #
+    regsub -all {[\r]} [string trim $s] "" s
+    #
+    # Split on newlines.
+    #
+    set s [split $s "\n"]
+    #
+    # Process each line. Use a temporary associative array "tmp" where key=unit
+    # name and value=list of states.
+    #
+    for {set i 1} {$i < [llength $s]} {incr i} {
+        set line [lindex $s $i]
+        set columns [split $line ","]
+        set unit_name [lindex $columns 2]
+        # Retrieve list of statuses for this unit from associative array OR
+        # create new empty list
+        if {[info exists tmp($unit_name)]} {
+            set unit_statuses $tmp($unit_name)
+        } else {
+            set unit_statuses [list]
+        }
+        # We may need to pad the list of unit_statuses with S (Susceptible)
+        set day [lindex $columns 1]
+        while {[llength $unit_statuses] < [expr $day - 1]} {
+            lappend unit_statuses "S"
+        }
+        set status [lindex $columns 3]
+        lappend unit_statuses $status
+        set tmp($unit_name) $unit_statuses
+    }
+    #
+    # Change the associative array into a plain list.
+    #
+    set result {}
+    set unit_names [array names tmp]
+    for {set i 0} {$i < [llength $unit_names]} {incr i} {
+        set unit_name [lindex $unit_names $i]
+        set unit_statuses $tmp($unit_name)
+        set values [concat [list $unit_name] $unit_statuses]
+        lappend result $values
+    }
+    return $result
+}
+
+
+
+#
 # progress_test -- tests that the correct sequence of herd states is output
 #   from a simulation.
 #
@@ -138,7 +205,7 @@ proc progress_test { scenario answer {test "progress"} } {
 	send "$scenario\n"
 	expect {
 		-re "($tablelinespat).*$prompt$" {
-			set output [simvaroutput_string_to_list $expect_out(1,string)]
+			set output [simstateoutput_string_to_list $expect_out(1,string)]
 
 			#
 			# Check that the output has the correct number of days and herds.
@@ -223,7 +290,7 @@ proc stochastic_progress_test { scenario answer {test "stochastic_progress"} {it
 
 		expect {
 			-re "($tablelinespat).*$prompt$" {
-				set output [simvaroutput_string_to_list $expect_out(1,string)]
+				set output [simstateoutput_string_to_list $expect_out(1,string)]
 
 				#
 				# Check that the output has the correct number of herds.
