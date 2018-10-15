@@ -50,7 +50,7 @@ set varvaluepat "(?:(?:$floatpat))"
 # A line of a table of reporting variables.
 #
 set tablelinepat "\[^,\]+(,\[^,\]*)*"
-set tablelinespat "Run,Day(,\[^,\]*)*\[\\n\\r \]*($tablelinepat\[\\n\\r \]*)+"
+set tablelinespat "\[Rr\]un,\[Dd\]ay(,\[^,\]*)*\[\\n\\r \]*($tablelinepat\[\\n\\r \]*)+"
 
 
 
