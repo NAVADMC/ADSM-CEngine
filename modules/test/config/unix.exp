@@ -200,12 +200,19 @@ proc progress_test { scenario answer {test "progress"} } {
 			set output [simstateoutput_string_to_list $expect_out(1,string)]
 
 			#
-			# Check that the output has the correct number of days.
+			# Check that the output has the correct number of days. The number
+			# of days of output can differ from herd to herd because tails of
+			# "S"s can be omitted from the output. Therefore look for the max
+			# number of days.
 			#
-			set output_herds [dict keys $output]
-			set first_name [lindex $output_herds 0]
-			set ndays [llength [dict get $output $first_name]]
-			if { $ndays != $true_ndays } {
+			set max_ndays 0
+			foreach herd [dict keys $output] {
+			    set ndays [llength [dict get $output $herd]]
+			    if { $ndays > $max_ndays } {
+			        set max_ndays $ndays
+			    }
+			}
+			if { $max_ndays != $true_ndays } {
 				fail "$test output should have $true_ndays days, not $ndays"
 				return
 			}
