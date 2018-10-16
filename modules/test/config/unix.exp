@@ -149,6 +149,7 @@ proc simstateoutput_string_to_list { s } {
     # states.
     #
     set result [dict create]
+    set max_ndays 0
     for {set i 1} {$i < [llength $s]} {incr i} {
         set line [lindex $s $i]
         set columns [split $line ","]
@@ -168,6 +169,18 @@ proc simstateoutput_string_to_list { s } {
         set state [lindex $columns 3]
         lappend herd_states $state
         dict set result $herd $herd_states        
+        set ndays [llength $herd_states]
+        if { $ndays > $max_ndays } {
+            set max_ndays $ndays
+        }
+    }
+    # Pad all of the lists of herd states to the same length for convenience
+    foreach herd [dict keys $result] {
+        set herd_states [dict get $result $herd]
+        while { [llength $herd_states] < $max_ndays } {
+            lappend herd_states "S"
+        }
+        dict set result $herd $herd_states
     }
     return $result
 }
@@ -205,14 +218,10 @@ proc progress_test { scenario answer {test "progress"} } {
 			# "S"s can be omitted from the output. Therefore look for the max
 			# number of days.
 			#
-			set max_ndays 0
-			foreach herd [dict keys $output] {
-			    set ndays [llength [dict get $output $herd]]
-			    if { $ndays > $max_ndays } {
-			        set max_ndays $ndays
-			    }
-			}
-			if { $max_ndays != $true_ndays } {
+			set herds [dict keys $output]
+			set first_herd [lindex $herds 0]
+			set ndays [llength [dict get $output $first_herd]]
+			if { $ndays != $true_ndays } {
 				fail "$test output should have $true_ndays days, not $ndays"
 				return
 			}
@@ -232,17 +241,6 @@ proc progress_test { scenario answer {test "progress"} } {
 					# If that herd does not exist in the output, that's OK as
 					# long as the true state is S.
 					if { ![dict exists $output $herd] } {
-						if { $is_susceptible } {
-							continue
-						} else {
-							fail "$test on day $day herd $herd should be in state $true_state, not $state"
-							return
-						}
-					}
-					# If that herd doesn't have a state for the current day in
-					# the output, that's OK as long as the true state is S.
-					set herd_states [dict get $output $herd]
-					if { [llength $herd_states] <= $day } {
 						if { $is_susceptible } {
 							continue
 						} else {
