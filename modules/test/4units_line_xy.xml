@@ -4,6 +4,7 @@
     <PROJ4>+ellps=WGS84 +units=km +lon_0=0.0449157 +proj=cea</PROJ4>
   </spatial_reference>
   <herd>
+    <id>0</id>
     <production-type>Beef Cattle</production-type>
     <size>25</size>
     <location>
@@ -13,6 +14,7 @@
     <status>Latent</status>
   </herd>
   <herd>
+    <id>1</id>
     <production-type>Beef Cattle</production-type>
     <size>25</size>
     <location>
@@ -22,6 +24,7 @@
     <status>Susceptible</status>
   </herd>
   <herd>
+    <id>2</id>
     <production-type>Beef Cattle</production-type>
     <size>25</size>
     <location>
@@ -31,6 +34,7 @@
     <status>Susceptible</status>
   </herd>
   <herd>
+    <id>3</id>
     <production-type>Beef Cattle</production-type>
     <size>25</size>
     <location>
