@@ -213,10 +213,7 @@ proc progress_test { scenario answer {test "progress"} } {
 			set output [simstateoutput_string_to_list $expect_out(1,string)]
 
 			#
-			# Check that the output has the correct number of days. The number
-			# of days of output can differ from herd to herd because tails of
-			# "S"s can be omitted from the output. Therefore look for the max
-			# number of days.
+			# Check that the output has the correct number of days.
 			#
 			set herds [dict keys $output]
 			set first_herd [lindex $herds 0]
@@ -289,9 +286,6 @@ proc stochastic_progress_test { scenario answer {test "stochastic_progress"} {it
 	global verbose
 
 	set noutcomes [llength $answer]
-	set first_outcome [lindex $answer 0]
-	set true_nherds [llength [lindex $first_outcome 1]]
-
 	set true_freq []
 	for {set i 0} {$i < $noutcomes} {incr i} {
 		lappend true_freq [lindex [lindex $answer $i] 0]
@@ -314,14 +308,13 @@ proc stochastic_progress_test { scenario answer {test "stochastic_progress"} {it
 				set output [simstateoutput_string_to_list $expect_out(1,string)]
 
 				#
-				# Check that the output has the correct number of herds.
+				# The number of herds may differ in the output and the answer,
+				# because herds that are Susceptible throughout the simulation will
+				# not appear in the output.
 				#
-				set nherds [llength $output]
-				if { $nherds != $true_nherds } {
-					fail "$test output should have $true_nherds herds, not $nherds"
-					return
-				}
-				set ndays [expr [llength [lindex $output 0]] - 1]
+				set herds [dict keys $output]
+				set first_herd [lindex $herds 0]
+				set ndays [llength [dict get $output $first_herd]]
 
 				#
 				# Check that the sequence of states matches one of the possible
@@ -329,20 +322,40 @@ proc stochastic_progress_test { scenario answer {test "stochastic_progress"} {it
 				#
 				set errors []
 				for {set j 0} {$j < $noutcomes} {incr j} {
-					set true_states [lindex $answer $j]
+					# "true_states" should be a dict where the keys are herd
+					# IDs and the values are lists of states. However I had
+					# some problems passing lists of dicts of a function. So
+					# instead they are passed as a list of alternating
+					# herd ID - list of states - herd ID - list of states etc.
+					# which is turned into a dict by the following 2 lines.
+					set true_states [dict create]
+					set true_states [dict merge $true_states [lindex $answer $j 1]]
 					set error ""
 
 					#
 					# Check that the output has the correct number of days.
 					#
-					set true_ndays [expr [llength $true_states] - 1]
+					set true_herds [dict keys $true_states]
+					set first_herd [lindex $true_herds 0]
+					set true_ndays [llength [dict get $true_states $first_herd]]
 					if { $ndays != $true_ndays } {
 						set error "in outcome [expr $j + 1] output should have $true_ndays days, not $ndays"
 					} else {
 						for {set day 0} {$day < $true_ndays} {incr day} {
-							for {set herd 0} {$herd < $true_nherds} {incr herd} {
-								set true_state [lindex [lindex $true_states [expr $day + 1]] $herd]
-								set state [lindex [lindex $output $herd] [expr $day + 1]]
+							foreach herd [dict keys $true_states] {
+								set true_state [lindex [dict get $true_states $herd] $day]
+								set is_susceptible [expr [string compare $true_state "S"] == 0]
+								# If that herd does not exist in the output,
+								# that's OK as long as the true state is S.
+								if { ![dict exists $output $herd] } {
+									if { $is_susceptible } {
+										continue
+									} else {
+										set error "in outcome [expr $j + 1] on day $day herd $herd should be in state $true_state, not S"
+										break
+									}
+								}
+								set state [lindex [dict get $output $herd] $day]
 								if { [string compare $true_state $state] != 0 } {
 									set error "in outcome [expr $j + 1] on day $day herd $herd should be in state $true_state, not $state"
 									break

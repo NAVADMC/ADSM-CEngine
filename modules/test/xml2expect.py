@@ -158,14 +158,21 @@ expect_after {
 		category = getText (test.getElementsByTagName ("category")[0])
 		parameterFileName = getText (test.getElementsByTagName ("parameter-file")[0])
 		populationFileName = getText (test.getElementsByTagName ("population-file")[0])
+		unitNames = getUnitNames (parameterFileName, populationFileName)
 		print('set scenario "test/module.%s/%s_%s.db"' % (category, parameterFileName, populationFileName))
 
 		tables = test.getElementsByTagName ("output")
 		print('set states {')
 		for table in tables:
 			print('  {', table.getAttribute ("probability"))
-			for row in table.getElementsByTagName ("tr"):
-				print('  {', ' '.join(rowToStates (row, state_code)), '}')
+			rows = [rowToStates(row, state_code)
+			        for row in table.getElementsByTagName ("tr")]
+			print('    {')
+			for i in range(len(unitNames)):
+				print('      "%s" {' % unitNames[i], end=' ')
+				print(' '.join([row[i] for row in rows]), end=' ')
+				print('}')
+			print('    }')
 			print('  }')
 		print('}')
 
