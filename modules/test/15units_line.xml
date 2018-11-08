@@ -115,13 +115,13 @@
   </herd>
   <herd>
     <id>12</id>
-    <production-type>B</production-type>
+    <production-type>A</production-type>
     <size>14</size>
     <location>
       <x>5</x>
       <y>0</y>
     </location>
-    <status>L</status>
+    <status>S</status>
   </herd>
   <herd>
     <id>13</id>
