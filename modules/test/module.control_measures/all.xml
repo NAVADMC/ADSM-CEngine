@@ -8262,6 +8262,7 @@
     vaccination ring created around a detected “A” unit is the same size as the
     ring created around a detected “F” unit, as shown in the diagram.  There is
     capacity to vaccinate 2 units per day starting on day 3 of the simulation.
+    Detected units are not vaccinated.
 
     What should happen:
      - On day 1 units A and F will be Latent.
@@ -8270,7 +8271,7 @@
        G-K will be queued for vaccination, as shown in the diagram.
      - On day 3, there is capacity to vaccinate 2 units. Units E and K are at
        the outside of the rings, so they will be vaccinated. (Their state will
-       show as Vaccine Immune on day 5.)
+       show as Vaccine Immune on day 4.)
      - On days 4-6, 2 units will be vaccinated each day, moving inward into the
        rings.
      - On day 7, nothing new happens: all of the units that need to be
@@ -8322,6 +8323,7 @@
     vaccination ring created around a detected “A” unit is the same size as the
     ring created around a detected “F” unit, as shown in the diagram.  There is
     capacity to vaccinate 2 units per day starting on day 3 of the simulation.
+    Detected units are not vaccinated.
 
     What should happen:
      - On day 1 units A and F will be Latent.
@@ -8330,7 +8332,7 @@
        G-K will be queued for vaccination, as shown in the diagram.
      - On day 3, there is capacity to vaccinate 2 units. Units B and G are at
        the inside of the rings, so they will be vaccinated. (Their state will
-       show as Vaccine Immune on day 5.)
+       show as Vaccine Immune on day 4.)
      - On days 4-6, 2 units will be vaccinated each day, moving outward toward
        the edge of the rings.
      - On day 7, nothing new happens: all of the units that need to be
