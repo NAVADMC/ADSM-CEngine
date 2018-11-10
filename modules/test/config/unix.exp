@@ -241,13 +241,13 @@ proc progress_test { scenario answer {test "progress"} } {
 						if { $is_susceptible } {
 							continue
 						} else {
-							fail "$test on day $day herd $herd should be in state $true_state, not S"
+							fail "$test on day [expr $day+1] herd $herd should be in state $true_state, not S"
 							return
 						}
 					}
 					set state [lindex [dict get $output $herd] $day]
 					if { [string compare $true_state $state] != 0 } {
-						fail "$test on day $day herd $herd should be in state $true_state, not $state"
+						fail "$test on day [expr $day+1] herd $herd should be in state $true_state, not $state"
 						return
 					}
 				}
@@ -351,13 +351,13 @@ proc stochastic_progress_test { scenario answer {test "stochastic_progress"} {it
 									if { $is_susceptible } {
 										continue
 									} else {
-										set error "in outcome [expr $j + 1] on day $day herd $herd should be in state $true_state, not S"
+										set error "in outcome [expr $j + 1] on day [expr $day+1] herd $herd should be in state $true_state, not S"
 										break
 									}
 								}
 								set state [lindex [dict get $output $herd] $day]
 								if { [string compare $true_state $state] != 0 } {
-									set error "in outcome [expr $j + 1] on day $day herd $herd should be in state $true_state, not $state"
+									set error "in outcome [expr $j + 1] on day [expr $day+1] herd $herd should be in state $true_state, not $state"
 									break
 								}
 							}
