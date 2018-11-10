@@ -8625,8 +8625,9 @@
 
   <parameter-description>
     For production types A and B, the infectious subclinical period is 1 day,
-    and the latent period is 30 days.  This ensures that just 1 A unit and 1 B
-    unit will be detected during this simulation, on day 2.
+    the infectious clinical period is 1 day, and the latent period is 30 days.
+    This ensures that just 1 A unit and 1 B unit will be detected during this
+    simulation, on day 2.
     
     Vaccination begins after 1 detection.  There is capacity to vaccinate 2
     units per day.
@@ -8684,8 +8685,9 @@
 
   <parameter-description>
     For production types A and B, the infectious subclinical period is 1 day,
-    and the latent period is 30 days.  This ensures that just 1 A unit and 1 B
-    unit will be detected during this simulation, on day 2.
+    the infectious clinical period is 1 day, and the latent period is 30 days.
+    This ensures that just 1 A unit and 1 B unit will be detected during this
+    simulation, on day 2.
     
     Vaccination begins after 1 detection.  There is capacity to vaccinate 1
     unit per day.
@@ -8752,8 +8754,9 @@
 
   <parameter-description>
     For production types A and B, the infectious subclinical period is 1 day,
-    and the latent period is 30 days.  This ensures that just 1 A unit and 1 B
-    unit will be detected during this simulation, on day 2.
+    the infectious clinical period is 1 day, and the latent period is 30 days.
+    This ensures that just 1 A unit and 1 B unit will be detected during this
+    simulation, on day 2.
     
     Vaccination begins after 1 detection.  There is capacity to vaccinate 1
     unit per day.
