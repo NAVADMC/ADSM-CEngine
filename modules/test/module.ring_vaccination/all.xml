@@ -8377,7 +8377,7 @@
      - On day 2 units A and F will be Infectious Clinical. They will be
        detected and a vaccination program will be initiated.
      - On day 3, all units within 3-4 km of unit A will be vaccinated (namely,
-       unit D). All units within 2-4 km of unit F will be vaccinated
+       unit D). All units within 1-2 km of unit F will be vaccinated
        (namely, unit G). Their state will show as Vaccine Immune on day
        4.
      - On day 4, nothing new happens: all of the units that need to be
@@ -8485,8 +8485,8 @@
        vaccination program will be initiated, and all of the units in the right
        ring will be queued for vaccination.
      - Starting on day 3, one unit can be vaccinated each day. Going by unit
-       size, the right ring will be vaccinated in this order: 7, 8, 9, 10, 11,
-       12.  On day 3, unit 7 is vaccinated (its state will show as Vaccine
+       size, the right ring will be vaccinated in this order: 7, 8, 9, 10, 11, 12.
+       On day 3, unit 7 is vaccinated (its state will show as Vaccine
        Immune on day 4).
      - On day 4, vaccination of the right ring will continue with unit 8.
      - On day 5, unit A will be Infectious Clinical. It will be detected and
