@@ -154,7 +154,8 @@ set ylabel "km (N-S)"\
 
 	# Colour comes from the line type in gnuplot.  Create an array of line
 	# types for the colours in the unit state-transition diagram.
-	linetype = [7,6,8,1,2,3,7,7]
+	linecolor = ['#7f7f7f', '#e5e500', '#e59900', '#cc0000',
+	             '#00a800', '#0000a8', '#000000', '#7f7f7f']
 
 	# Create an array of point types for dot shapes.
 	pointtype = [71,7,7,7,7,7,7,7]
@@ -170,8 +171,8 @@ set ylabel "km (N-S)"\
 			pointsize = 2.0
 		else:
 			pointsize = 2.0 * (unit.size - minsize) / sizerange + 1.0
-		command.append ("'-' notitle w p lt %i pt %i ps %g"
-		  % (linetype[unit.state], pointtype[unit.state], pointsize))
+		command.append ("'-' notitle w p lc '%s' pt %i ps %g"
+		  % (linecolor[unit.state], pointtype[unit.state], pointsize))
 
 	# Add commands to draw (off-screen) lines just to get a legend.
 	#for state in unique ([state for size, x, y, state, unit_id in units]):
