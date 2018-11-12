@@ -1544,13 +1544,13 @@ set_params (void *data, GHashTable *dict)
   g_assert (REL_chart_min (p->movement_control) >= 0);
 
   errno = 0;
-  tmp = strtol (g_hash_table_lookup (dict, "latent_animals_can_infect_others"), NULL, /* base */ 10);
+  tmp = strtol (g_hash_table_lookup (dict, "latent_units_can_infect_others"), NULL, /* base */ 10);
   g_assert (errno != ERANGE && errno != EINVAL);
   g_assert (tmp == 0 || tmp == 1);
   p->latent_units_can_infect = (tmp == 1);
 
   errno = 0;
-  tmp = strtol (g_hash_table_lookup (dict, "subclinical_animals_can_infect_others"), NULL, /* base */ 10);
+  tmp = strtol (g_hash_table_lookup (dict, "subclinical_units_can_infect_others"), NULL, /* base */ 10);
   g_assert (errno != ERANGE && errno != EINVAL);
   g_assert (tmp == 0 || tmp == 1);
   p->subclinical_units_can_infect = (tmp == 1);
@@ -1785,12 +1785,12 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
    * to-production-type combination specific parameters. */
   local_data->db = params;
   sqlite3_exec_dict (params,
-                     "SELECT src_prodtype.name AS src_prodtype,dest_prodtype.name AS dest_prodtype,\"direct\" AS contact_type,use_fixed_contact_rate,contact_rate,distance_distribution_id,transport_delay_id,infection_probability,movement_control_id,latent_animals_can_infect_others,subclinical_animals_can_infect_others "
+                     "SELECT src_prodtype.name AS src_prodtype,dest_prodtype.name AS dest_prodtype,\"direct\" AS contact_type,use_fixed_contact_rate,contact_rate,distance_distribution_id,transport_delay_id,infection_probability,movement_control_id,latent_units_can_infect_others,subclinical_units_can_infect_others "
                      "FROM ScenarioCreator_productiontype src_prodtype,ScenarioCreator_productiontype dest_prodtype,ScenarioCreator_diseasespreadassignment pairing,ScenarioCreator_directspread direct "
                      "WHERE src_prodtype.id=pairing.source_production_type_id "
                      "AND dest_prodtype.id=pairing.destination_production_type_id "
                      "AND pairing.direct_contact_spread_id = direct.id "
-                     "UNION SELECT src_prodtype.name AS src_prodtype,dest_prodtype.name AS dest_prodtype,\"indirect\" AS contact_type,use_fixed_contact_rate,contact_rate,distance_distribution_id,transport_delay_id,infection_probability,movement_control_id,0 AS latent_animals_can_infect_others,subclinical_animals_can_infect_others "
+                     "UNION SELECT src_prodtype.name AS src_prodtype,dest_prodtype.name AS dest_prodtype,\"indirect\" AS contact_type,use_fixed_contact_rate,contact_rate,distance_distribution_id,transport_delay_id,infection_probability,movement_control_id,0 AS latent_units_can_infect_others,subclinical_units_can_infect_others "
                      "FROM ScenarioCreator_productiontype src_prodtype,ScenarioCreator_productiontype dest_prodtype,ScenarioCreator_diseasespreadassignment pairing,ScenarioCreator_indirectspread indirect "
                      "WHERE src_prodtype.id=pairing.source_production_type_id "
                      "AND dest_prodtype.id=pairing.destination_production_type_id "
