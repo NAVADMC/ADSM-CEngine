@@ -3114,7 +3114,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   sqlite3_exec_dict (params,
                      "SELECT vaccination_capacity_id,restart_vaccination_capacity_id,vaccination_priority_order,"
                      "vaccinate_retrospective_days "
-                     "FROM ScenarioCreator_controlmasterplan",
+                     "FROM ScenarioCreator_vaccinationglobal",
                      set_global_params, &set_params_args, &sqlerr);
   if (sqlerr)
     {

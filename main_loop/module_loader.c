@@ -196,7 +196,7 @@ adsm_load_modules (sqlite3 *scenario_db, UNT_unit_list_t * units,
       g_ptr_array_add (instantiation_fns, airborne_spread_model_new);
     }
 
-  disable_all_controls = PAR_get_boolean (scenario_db, "SELECT disable_all_controls FROM ScenarioCreator_controlmasterplan");
+  disable_all_controls = PAR_get_boolean (scenario_db, "SELECT disable_all_controls FROM ScenarioCreator_vaccinationglobal");
 
   /* Instantiate the zone module even if disable_all_controls is true. This
    * prevents dangling references when there are movement control charts,
