@@ -29,17 +29,18 @@ Exactly follow these steps to compile the CEngine Executable for Windows.
 1. `pacman -Su`  
 1. Install build tools needed by ADSM.  
 `pacman -S pkg-config autoconf automake-wrapper gcc make bison python`
-1. Install packages needed by ADSM. Specific versions should be installed and newer versions should be tested before the version numbers are incremented in these instructions.
-`pacman -U http://repo.msys2.org/msys/x86_64/glib2-2.48.2-1-x86_64.pkg.tar.xz`  
-`pacman -U http://repo.msys2.org/msys/x86_64/glib2-devel-2.48.2-1-x86_64.pkg.tar.xz`  
+1. Install packages needed by ADSM. Specific versions should be installed and newer versions should be tested before the version numbers are incremented in these instructions.  
+`pacman -U http://repo.msys2.org/msys/x86_64/glib2-2.54.3-1-x86_64.pkg.tar.xz`  # If this gives you an error, just try pacman -U glib2 and read the output to confirm the version numbers match. If not, uninstall and try again  
+`pacman -U http://repo.msys2.org/msys/x86_64/glib2-devel-2.54.3-1-x86_64.pkg.tar.xz`  
 `pacman -U http://repo.msys2.org/mingw/x86_64/mingw-w64-x86_64-gsl-2.5-1-any.pkg.tar.xz`  
+`pacman -U http://repo.msys2.org/msys/x86_64/libsqlite-3.21.0-2-x86_64.pkg.tar.xz`
 `pacman -U http://repo.msys2.org/msys/x86_64/libsqlite-devel-3.21.0-2-x86_64.pkg.tar.xz`  
 `pacman -U http://repo.msys2.org/mingw/x86_64/mingw-w64-x86_64-shapelib-1.4.1-1-any.pkg.tar.xz`  
 `pacman -U http://repo.msys2.org/mingw/x86_64/mingw-w64-x86_64-json-glib-1.2.8-1-any.pkg.tar.xz`
 1. `ln -s /mingw64/include/json-glib-1.0/json-glib /mingw64/include/json-glib`
 1. Close the terminal
 1. Download the General Polygon Clipper Library (GPC): http://www.cs.man.ac.uk/~toby/gpc/assets/gpc232-release.zip
-1. Unpack gpc (easiest if you unpack into your msys home directory 'C:\msys2\home\username\') 
+1. Unpack gpc (easiest if you unpack into subdirectory of your msys home directory 'C:\msys64\home\username\') 
 1. Open the msys terminal and cd into the unpacked gpc directory
 1. `mkdir -p /usr/local/lib`  
 1. `mkdir -p /usr/local/include/gpcl/`  
@@ -53,7 +54,7 @@ Exactly follow these steps to compile the CEngine Executable for Windows.
 1. In your favorite text editor, add the following lines to '~/.bash_profile':
    ```bash
    export PATH=$PATH:/mingw64/bin  
-   export CFLAGS='-I/usr/local/include -I/mingw64/include -I/mingw64/include/glib-2.0'   
+   export CFLAGS='-I/usr/local/include -I/mingw64/include -I/mingw64/include/glib-2.0 -DACCEPT_USE_OF_DEPRECATED_PROJ_API_H'   
    export LDFLAGS='-L/usr/local/lib -L/usr/lib -L/mingw64/lib'  
    export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/mingw64/lib/pkgconfig
    
@@ -87,7 +88,7 @@ Follow these steps to compile the CEngine Executable for Linux.
 1. `sudo su`
 1. `apt-get update`
 1. `apt-get upgrade`
-1. `apt-get install make gcc pkg-config autoconf automake bison python libglib2-dev libgd3 libgd-dev libgsl2 libgsl-dev sqlite3 libsqlite3-dev shapelib libshp-dev libjson-glib-1.0-0 proj-bin libproj-dev flex`
+1. `apt-get install make gcc pkg-config autoconf automake bison python libglib2.0-dev libgd3 libgd-dev libgsl23 libgsl-dev sqlite3 libsqlite3-dev shapelib libshp-dev libjson-glib-1.0-0 proj-bin libproj-dev flex libjson-glib-dev dia`
 1. `wget http://www.cs.man.ac.uk/~toby/gpc/assets/gpc232-release.zip`
 1. (unzip gpc)
 1. `cd gpc232-release`
@@ -101,7 +102,7 @@ Follow these steps to compile the CEngine Executable for Linux.
 1. `cp gpc.h /usr/local/include/gpcl/` 
 1. `export CFLAGS='-I/usr/local/include'`
 1. `export LDFLAGS='-L/usr/local/lib -L/usr/lib'`
-1. `cd /path/to/projects; git clone git@github.com:NAVADMC/ADSM-CEngine.git`
+1. `cd /path/to/projects; git clone git@github.com:NAVADMC/ADSM-CEngine.git`  # If you don't have ssh keys setup on GitHub, you should clone via https (not preferred)
 1. `cd /path/to/projects/ADSM-CEngine`
 1. In your favorite text editor, modify './bootstrap' to comment out the Windows aclocal line and uncomment the Linux aclocal line
 1. `sh bootstrap`
@@ -110,7 +111,6 @@ Follow these steps to compile the CEngine Executable for Linux.
    1. `mv /usr/bin/python /usr/bin/python-back`
    1. `ln -s /usr/bin/python3 /usr/bin/python`
 1. `make`
-   * The make command will build the ADSM executables but then stop on an error when it reaches the doc/diagrams directory (compiling the free diagramming tool Dia is not covered here)
    * The compiled output will be './main_loop/adsm_simulation'
 1. Undo your python change
    1. `rm /usr/bin/python`
